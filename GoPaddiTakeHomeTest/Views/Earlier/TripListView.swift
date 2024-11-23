@@ -13,7 +13,7 @@ struct TripListView: View {
     @StateObject private var planningViewModel = TripPlanningViewModel() // Add this
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in

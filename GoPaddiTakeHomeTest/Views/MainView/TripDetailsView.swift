@@ -127,7 +127,7 @@ struct TripDetailsView: View {
 }
 
 #Preview("TripDetailsView - Full Data") {
-    NavigationView {
+    NavigationStack {
         TripDetailsView(
             tripName: "Bahamas Family Trip",
             travelStyle: .family,
