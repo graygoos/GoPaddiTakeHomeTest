@@ -110,8 +110,14 @@ class TripPlanningViewModel: ObservableObject {
     @Published var showCreateTrip = false
     @Published var showTripDetail = false
     @Published var trips: [Trip] = []
+    @Published var newlyCreatedTrip: Trip?
     
-    // Properties to pass data between views
+    private let tripsKey = "SavedTrips"
+    
+    init() {
+        loadTrips()
+    }
+    
     var currentTripName: String = ""
     var currentTripStyle: TravelStyle = .solo
     var currentTripDescription: String = ""
@@ -121,10 +127,6 @@ class TripPlanningViewModel: ObservableObject {
     }
     
     func createDetailedTrip(name: String, travelStyle: TravelStyle, description: String) {
-        currentTripName = name
-        currentTripStyle = travelStyle
-        currentTripDescription = description
-        
         if let location = selectedLocation,
            let startDate = tripDates.startDate,
            let endDate = tripDates.endDate {
@@ -133,7 +135,7 @@ class TripPlanningViewModel: ObservableObject {
                 name: name,
                 destination: "\(location.name), \(location.country)",
                 date: startDate,
-                endDate: endDate,  // Include end date
+                endDate: endDate,
                 details: description,
                 price: 0.0,
                 images: [],
@@ -141,8 +143,10 @@ class TripPlanningViewModel: ObservableObject {
             )
             
             trips.insert(newTrip, at: 0)
-            resetFormData()
+            saveTrips()
+            newlyCreatedTrip = newTrip
             showTripDetail = true
+            resetFormData()
         }
     }
     
@@ -154,10 +158,20 @@ class TripPlanningViewModel: ObservableObject {
         currentTripDescription = ""
     }
     
-    func fetchTrips() {
-        // For now, we'll keep the sample trips and add new ones to them
-        if trips.isEmpty {
-            trips = []
+    private func saveTrips() {
+        if let encoded = try? JSONEncoder().encode(trips) {
+            UserDefaults.standard.set(encoded, forKey: tripsKey)
         }
+    }
+    
+    private func loadTrips() {
+        if let savedTrips = UserDefaults.standard.data(forKey: tripsKey),
+           let decodedTrips = try? JSONDecoder().decode([Trip].self, from: savedTrips) {
+            trips = decodedTrips
+        }
+    }
+    
+    func fetchTrips() {
+        loadTrips()
     }
 }

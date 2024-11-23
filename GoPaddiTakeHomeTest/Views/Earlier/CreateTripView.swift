@@ -13,6 +13,7 @@ struct CreateTripView: View {
     @State private var tripName = ""
     @State private var selectedTravelStyle: TravelStyle?
     @State private var tripDescription = ""
+    @State private var navigateToDetails = false
     
     var isFormValid: Bool {
         !tripName.isEmpty && selectedTravelStyle != nil && !tripDescription.isEmpty
@@ -26,6 +27,7 @@ struct CreateTripView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24, height: 24)
+                    .foregroundStyle(.appBlue)
                 
                 Spacer()
                 
@@ -33,7 +35,7 @@ struct CreateTripView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.appBlue)
                 }
             }
             .padding()
@@ -105,7 +107,7 @@ struct CreateTripView: View {
                         travelStyle: selectedTravelStyle ?? .solo,
                         description: tripDescription
                     )
-                    dismiss() // Dismiss the sheet after creating the trip
+                    dismiss()
                 }
             } label: {
                 Text("Next")

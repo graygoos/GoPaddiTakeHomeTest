@@ -58,12 +58,9 @@ struct TripPlanningView: View {
                                     .padding(.vertical)
                             } else {
                                 ForEach(viewModel.trips) { trip in
-                                    NavigationLink(destination: TripDetailsView(trip: trip)) {
-                                        TripCardView(trip: trip) {
-                                            // This closure handles the View button tap
-                                        }
+                                    TripCardView(trip: trip) {
+                                        selectedTrip = trip
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                         }
@@ -105,22 +102,11 @@ struct TripPlanningView: View {
             }
             .navigationTitle("Plan a Trip")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $viewModel.showTripDetail) {
-                if let location = viewModel.selectedLocation {
-                    // Create a Trip instance for the new trip
-                    let newTrip = Trip(
-                        id: UUID().uuidString,
-                        name: viewModel.currentTripName,
-                        destination: "\(location.name), \(location.country)",
-                        date: viewModel.tripDates.startDate ?? Date(),
-                        endDate: viewModel.tripDates.endDate,
-                        details: viewModel.currentTripDescription,
-                        price: 0.0,
-                        images: [],
-                        location: location
-                    )
-                    TripDetailsView(trip: newTrip)
-                }
+            .navigationDestination(item: $selectedTrip) { trip in
+                TripDetailsView(trip: trip)
+            }
+            .navigationDestination(item: $viewModel.newlyCreatedTrip) { trip in
+                TripDetailsView(trip: trip)
             }
             .toolbar {
                 Button {
