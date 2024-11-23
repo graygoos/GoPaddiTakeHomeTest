@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TripPlanningView: View {
     @StateObject private var viewModel = TripPlanningViewModel()
+    @State private var selectedTrip: Trip?
     
     var body: some View {
         NavigationStack {
@@ -46,16 +47,24 @@ struct TripPlanningView: View {
                         }
                         
                         // Your Trips section
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 24) {
                             Text("Your Trips")
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.bold)
                             
-                            Text("Your trip itineraries and planned trips are placed here")
-                                .foregroundColor(.secondary)
-                            
-                            ForEach(viewModel.trips) { trip in
-                                TripCardView(trip: trip)
+                            if viewModel.trips.isEmpty {
+                                Text("No trips planned yet")
+                                    .foregroundColor(.secondary)
+                                    .padding(.vertical)
+                            } else {
+                                ForEach(viewModel.trips) { trip in
+                                    NavigationLink(destination: TripDetailsView(trip: trip)) {
+                                        TripCardView(trip: trip) {
+                                            // This closure handles the View button tap
+                                        }
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
                             }
                         }
                         .padding()
@@ -91,15 +100,27 @@ struct TripPlanningView: View {
                     .transition(.move(edge: .top))
                 }
             }
+            .task {
+                viewModel.fetchTrips() // Fetch trips when view appears
+            }
             .navigationTitle("Plan a Trip")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $viewModel.showTripDetail) {
-                TripDetailsView(
-                    tripName: viewModel.currentTripName,
-                    travelStyle: viewModel.currentTripStyle,
-                    description: viewModel.currentTripDescription,
-                    viewModel: viewModel
-                )
+                if let location = viewModel.selectedLocation {
+                    // Create a Trip instance for the new trip
+                    let newTrip = Trip(
+                        id: UUID().uuidString,
+                        name: viewModel.currentTripName,
+                        destination: "\(location.name), \(location.country)",
+                        date: viewModel.tripDates.startDate ?? Date(),
+                        endDate: viewModel.tripDates.endDate,
+                        details: viewModel.currentTripDescription,
+                        price: 0.0,
+                        images: [],
+                        location: location
+                    )
+                    TripDetailsView(trip: newTrip)
+                }
             }
             .toolbar {
                 Button {

@@ -34,19 +34,19 @@ struct ActionButton: View {
         ActionButton(
             title: "Add Activities",
             subtitle: "Build, personalize, and optimize your itineraries with our trip planner",
-            action: {}
+            action: { print("Activities tapped") }
         )
         
         ActionButton(
             title: "Add Hotels",
             subtitle: "Find and book the perfect place to stay",
-            action: {}
+            action: { print("Hotels tapped") }
         )
         
         ActionButton(
             title: "Add Flights",
             subtitle: "Search and compare flight options",
-            action: {}
+            action: { print("Flights tapped") }
         )
     }
     .padding()

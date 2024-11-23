@@ -99,12 +99,14 @@ struct CreateTripView: View {
             
             // Bottom Button
             Button {
-                viewModel.createDetailedTrip(
-                    name: tripName,
-                    travelStyle: selectedTravelStyle ?? .solo,
-                    description: tripDescription
-                )
-                dismiss() // Dismiss the sheet before showing trip details
+                if isFormValid {
+                    viewModel.createDetailedTrip(
+                        name: tripName,
+                        travelStyle: selectedTravelStyle ?? .solo,
+                        description: tripDescription
+                    )
+                    dismiss() // Dismiss the sheet after creating the trip
+                }
             } label: {
                 Text("Next")
                     .fontWeight(.semibold)

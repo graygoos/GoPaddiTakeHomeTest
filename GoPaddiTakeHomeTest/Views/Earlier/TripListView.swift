@@ -10,15 +10,20 @@ import SwiftUI
 struct TripListView: View {
     @StateObject private var viewModel = TripViewModel()
     @State private var showingCreateTrip = false
-    @StateObject private var planningViewModel = TripPlanningViewModel() // Add this
+    @StateObject private var planningViewModel = TripPlanningViewModel()
+    @State private var selectedTrip: Trip?
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     ForEach(viewModel.trips) { trip in
-                        TripCardView(trip: trip)
-                            .padding(.horizontal)
+                        NavigationLink(destination: TripDetailsView(trip: trip)) {
+                            TripCardView(trip: trip) {
+                                selectedTrip = trip
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
                 .padding(.top)
@@ -32,7 +37,10 @@ struct TripListView: View {
                 }
             }
             .sheet(isPresented: $showingCreateTrip) {
-                CreateTripView(viewModel: planningViewModel) // Use planningViewModel here
+                CreateTripView(viewModel: planningViewModel)
+            }
+            .navigationDestination(item: $selectedTrip) { trip in
+                TripDetailsView(trip: trip)
             }
         }
         .task {

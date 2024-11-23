@@ -8,15 +8,26 @@
 import SwiftUI
 
 // MARK: - Models
-struct Trip: Codable, Identifiable {
+struct Trip: Codable, Identifiable, Hashable {
     let id: String
     var name: String
     var destination: String
     var date: Date
+    var endDate: Date?
     var details: String
     var price: Double
     var images: [String]
     var location: Location?
+    
+    // Implement Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    // Implement Equatable (required for Hashable)
+    static func == (lhs: Trip, rhs: Trip) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 struct TripDate: Equatable {
@@ -24,13 +35,22 @@ struct TripDate: Equatable {
     var endDate: Date?
 }
 
-struct Location: Codable, Identifiable {
-    let id: String  // Add this
+struct Location: Codable, Identifiable, Hashable {
+    let id: String
     let name: String
     let country: String
     let flag: String
-    let subtitle: String? // For additional location info like "Doha" in your design
+    let subtitle: String?
     
+    // Implement Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    // Implement Equatable
+    static func == (lhs: Location, rhs: Location) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 // MARK: - View Models
@@ -87,11 +107,11 @@ class TripPlanningViewModel: ObservableObject {
     @Published var showLocationPicker = false
     @Published var showDatePicker = false
     @Published var isSelectingEndDate = false
-    @Published var showCreateTrip = false  // Add this
-    @Published var showTripDetail = false  // Add this
+    @Published var showCreateTrip = false
+    @Published var showTripDetail = false
     @Published var trips: [Trip] = []
     
-    // Add these properties to pass data between views
+    // Properties to pass data between views
     var currentTripName: String = ""
     var currentTripStyle: TravelStyle = .solo
     var currentTripDescription: String = ""
@@ -104,10 +124,40 @@ class TripPlanningViewModel: ObservableObject {
         currentTripName = name
         currentTripStyle = travelStyle
         currentTripDescription = description
-        showTripDetail = true
+        
+        if let location = selectedLocation,
+           let startDate = tripDates.startDate,
+           let endDate = tripDates.endDate {
+            let newTrip = Trip(
+                id: UUID().uuidString,
+                name: name,
+                destination: "\(location.name), \(location.country)",
+                date: startDate,
+                endDate: endDate,  // Include end date
+                details: description,
+                price: 0.0,
+                images: [],
+                location: location
+            )
+            
+            trips.insert(newTrip, at: 0)
+            resetFormData()
+            showTripDetail = true
+        }
+    }
+    
+    private func resetFormData() {
+        selectedLocation = nil
+        tripDates = TripDate()
+        currentTripName = ""
+        currentTripStyle = .solo
+        currentTripDescription = ""
     }
     
     func fetchTrips() {
-        trips = Trip.sampleTrips
+        // For now, we'll keep the sample trips and add new ones to them
+        if trips.isEmpty {
+            trips = []
+        }
     }
 }

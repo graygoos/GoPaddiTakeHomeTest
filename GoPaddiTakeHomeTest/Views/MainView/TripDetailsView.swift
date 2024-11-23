@@ -8,72 +8,57 @@
 import SwiftUI
 
 struct TripDetailsView: View {
-    let tripName: String
-    let travelStyle: TravelStyle
-    let description: String
-    @ObservedObject var viewModel: TripPlanningViewModel
+    let trip: Trip  // Change to accept Trip instead of individual properties
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Destination Image
-                ZStack(alignment: .top) {
-                    // Placeholder image or actual destination image
-                    Rectangle()
-                        .fill(.gray.opacity(0.3))
-                        .frame(height: 200)
-                    
-                    VStack {
-                        Spacer()
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(tripName)
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                
-                                if let location = viewModel.selectedLocation {
-                                    Text("\(location.name), \(location.country)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.white)
-                                }
-                            }
-                            Spacer()
+                // Header Image with Gradient Overlay
+                if let location = trip.location {
+                    ZStack(alignment: .bottom) {
+                        Image(location.name)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 300)
+                            .clipped()
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(trip.name)
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text("\(location.name), \(location.country)")
+                                .font(.headline)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
                         .background(
                             LinearGradient(
-                                gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
-                                startPoint: .top,
-                                endPoint: .bottom
+                                colors: [.black.opacity(0.7), .clear],
+                                startPoint: .bottom,
+                                endPoint: .top
                             )
                         )
+                        .foregroundColor(.white)
                     }
                 }
                 
-                // Trip Details
                 VStack(spacing: 24) {
                     // Dates
-                    if let startDate = viewModel.tripDates.startDate,
-                       let endDate = viewModel.tripDates.endDate {
-                        TripDetailRow(
+                    if let endDate = trip.endDate {
+                        DetailRow(
                             icon: "calendar",
+                            iconColor: .blue,
                             title: "Dates",
-                            detail: "\(startDate.formatted(date: .abbreviated, time: .omitted)) - \(endDate.formatted(date: .abbreviated, time: .omitted))"
+                            detail: formatDateRange(start: trip.date, end: endDate)
                         )
                     }
                     
-                    // Travel Style
-                    TripDetailRow(
-                        icon: "person.2.fill",
-                        title: "Travel Style",
-                        detail: travelStyle.rawValue
-                    )
-                    
                     // Location
-                    if let location = viewModel.selectedLocation {
-                        TripDetailRow(
+                    if let location = trip.location {
+                        DetailRow(
                             icon: "location.fill",
+                            iconColor: .blue,
                             title: "Location",
                             detail: "\(location.name), \(location.country) \(location.flag)"
                         )
@@ -83,7 +68,7 @@ struct TripDetailsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Description")
                             .font(.headline)
-                        Text(description)
+                        Text(trip.details)
                             .foregroundColor(.secondary)
                     }
                     
@@ -92,61 +77,75 @@ struct TripDetailsView: View {
                         ActionButton(
                             title: "Add Activities",
                             subtitle: "Build, personalize, and optimize your itineraries with our trip planner",
-                            action: {}
+                            action: { print("Add Activities") }
                         )
                         
                         ActionButton(
                             title: "Add Hotels",
                             subtitle: "Find and book the perfect place to stay",
-                            action: {}
+                            action: { print("Add Hotels") }
                         )
                         
                         ActionButton(
                             title: "Add Flights",
                             subtitle: "Search and compare flight options",
-                            action: {}
+                            action: { print("Add Flights") }
                         )
                     }
                 }
                 .padding()
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .ignoresSafeArea(edges: .top)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.white)
+                }
+            }
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button("Trip Collaboration", action: {})
                     Button("Share Trip", action: {})
                 } label: {
                     Image(systemName: "ellipsis")
-                        .foregroundColor(.primary)
+                        .foregroundColor(.white)
                 }
             }
         }
     }
+    
+    private func formatDateRange(start: Date, end: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
+    }
 }
 
-#Preview("TripDetailsView - Full Data") {
+#Preview("TripDetailsView - Light Mode") {
     NavigationStack {
         TripDetailsView(
-            tripName: "Bahamas Family Trip",
-            travelStyle: .family,
-            description: "A wonderful family vacation in the Bahamas with beach activities and water sports.",
-            viewModel: {
-                let vm = TripPlanningViewModel()
-                vm.selectedLocation = Location(
+            trip: Trip(
+                id: "1",
+                name: "Annual leave",
+                destination: "Laghouat, Algeria",
+                date: Date(),
+                endDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                details: "Going on my annual leave holiday with my family",
+                price: 0.0,
+                images: [],
+                location: Location(
                     id: "1",
-                    name: "Nassau",
-                    country: "Bahamas",
-                    flag: "🇧🇸",
-                    subtitle: "Paradise Island"
+                    name: "Laghouat",
+                    country: "Algeria",
+                    flag: "🇩🇿",
+                    subtitle: "Laghouat"
                 )
-                vm.tripDates = TripDate(
-                    startDate: Date(),
-                    endDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())
-                )
-                return vm
-            }()
+            )
         )
     }
 }
