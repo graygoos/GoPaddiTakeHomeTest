@@ -11,7 +11,7 @@ struct TripPlanningView: View {
     @StateObject private var viewModel = TripPlanningViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .top) {
                 ScrollView {
                     VStack(spacing: 0) {
@@ -93,6 +93,14 @@ struct TripPlanningView: View {
             }
             .navigationTitle("Plan a Trip")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $viewModel.showTripDetail) {
+                TripDetailsView(
+                    tripName: viewModel.currentTripName,
+                    travelStyle: viewModel.currentTripStyle,
+                    description: viewModel.currentTripDescription,
+                    viewModel: viewModel
+                )
+            }
             .toolbar {
                 Button {
                     withAnimation {
@@ -102,6 +110,9 @@ struct TripPlanningView: View {
                     Image(systemName: "plus")
                         .foregroundColor(.appBlue)
                 }
+            }
+            .sheet(isPresented: $viewModel.showCreateTrip) {
+                CreateTripView(viewModel: viewModel)
             }
         }
     }

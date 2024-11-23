@@ -20,19 +20,23 @@ struct CreateTripView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Custom Header
             HStack {
+                Image("palm-tree")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+                
+                Spacer()
+                
                 Button {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
                         .foregroundColor(.primary)
-                        .padding()
                 }
-                
-                Spacer()
             }
-            .background(Color(UIColor.systemBackground))
+            .padding()
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -97,9 +101,10 @@ struct CreateTripView: View {
             Button {
                 viewModel.createDetailedTrip(
                     name: tripName,
-                    travelStyle: selectedTravelStyle!,
+                    travelStyle: selectedTravelStyle ?? .solo,
                     description: tripDescription
                 )
+                dismiss() // Dismiss the sheet before showing trip details
             } label: {
                 Text("Next")
                     .fontWeight(.semibold)
@@ -112,6 +117,7 @@ struct CreateTripView: View {
             .disabled(!isFormValid)
             .padding()
         }
+        .presentationDetents([.height(UIScreen.main.bounds.height * 0.75)])
     }
 }
 

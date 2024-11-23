@@ -87,21 +87,27 @@ class TripPlanningViewModel: ObservableObject {
     @Published var showLocationPicker = false
     @Published var showDatePicker = false
     @Published var isSelectingEndDate = false
-    @Published var showTripDetail = false
-    @Published var trips: [Trip] = [] // Add this property
+    @Published var showCreateTrip = false  // Add this
+    @Published var showTripDetail = false  // Add this
+    @Published var trips: [Trip] = []
+    
+    // Add these properties to pass data between views
+    var currentTripName: String = ""
+    var currentTripStyle: TravelStyle = .solo
+    var currentTripDescription: String = ""
     
     var canCreateTrip: Bool {
         selectedLocation != nil && tripDates.startDate != nil && tripDates.endDate != nil
     }
     
     func createDetailedTrip(name: String, travelStyle: TravelStyle, description: String) {
-        // Create trip and navigate to detail view
+        currentTripName = name
+        currentTripStyle = travelStyle
+        currentTripDescription = description
         showTripDetail = true
     }
     
-    // Optional: Add a method to fetch trips if needed
     func fetchTrips() {
-        // Example implementation
         trips = Trip.sampleTrips
     }
 }
