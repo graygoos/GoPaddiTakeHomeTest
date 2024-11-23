@@ -73,7 +73,7 @@ struct TripCardView: View {
                     country: "Bahamas",
                     flag: "🇧🇸",
                     subtitle: "Paradise Island"
-                )
+                ), travelStyle: .couple
             )
         ) {
             print("View tapped")
@@ -95,7 +95,7 @@ struct TripCardView: View {
                     country: "United Arab Emirates",
                     flag: "🇦🇪",
                     subtitle: "Dubai International"
-                )
+                ), travelStyle: .group
             )
         ) {
             print("View tapped")

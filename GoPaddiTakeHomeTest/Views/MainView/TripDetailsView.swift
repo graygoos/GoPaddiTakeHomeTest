@@ -16,7 +16,7 @@ struct TripDetailsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Header Image without text overlay
+                // Header Image
                 if let location = trip.location {
                     Image(location.name)
                         .resizable()
@@ -26,45 +26,33 @@ struct TripDetailsView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    // Date with calendar icon
+                    // Trip Dates Row
                     if let endDate = trip.endDate {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar")
                                 .foregroundColor(.secondary)
-                            Text(trip.date.formatted(date: .abbreviated, time: .omitted))
-                                .foregroundColor(.secondary)
+                            Text(trip.date.formatted(date: .long, time: .omitted))
                             Image(systemName: "arrow.right")
                                 .foregroundColor(.secondary)
-                            Text(endDate.formatted(date: .abbreviated, time: .omitted))
-                                .foregroundColor(.secondary)
+                            Text(endDate.formatted(date: .long, time: .omitted))
                         }
                         .font(.system(size: 15))
                     }
                     
-                    // Trip name
+                    // Trip Name
                     Text(trip.name)
                         .font(.system(size: 24, weight: .bold))
                     
-                    // Location and travel style
+                    // Location and Travel Style
                     if let location = trip.location {
-                        DetailRow(
-                            icon: "location.fill",
-                            iconColor: .blue,
-                            title: "Location",
-                            detail: "\(location.name), \(location.country) \(location.flag)"
-                        )
-                    }
-                    
-                    // Description
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Description")
-                            .font(.headline)
-                        Text(trip.details)
+                        Text("\(location.name), \(location.country) \(location.flag) | \(trip.travelStyle.rawValue) Trip")
+                            .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
                     
-                    // Action Buttons
+                    // Action Buttons Row
                     HStack(spacing: 12) {
+                        // Trip Collaboration Button
                         Button {
                             showCollaborationAlert = true
                         } label: {
@@ -82,7 +70,7 @@ struct TripDetailsView: View {
                             .cornerRadius(8)
                         }
                         
-                        // Using ShareLink for sharing
+                        // Share Trip Button
                         ShareLink(
                             item: "Check out my trip to \(trip.location?.name ?? "")",
                             subject: Text("Trip Details"),
@@ -99,6 +87,7 @@ struct TripDetailsView: View {
                             .cornerRadius(8)
                         }
                         
+                        // More Options Menu
                         Menu {
                             Button(role: .destructive) {
                                 showDeleteAlert = true
@@ -115,7 +104,7 @@ struct TripDetailsView: View {
                     }
                     .padding(.vertical, 8)
                     
-                    // Activities Card - Dark navy background
+                    // Activities Section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Activities")
                             .font(.system(size: 17, weight: .semibold))
@@ -134,10 +123,10 @@ struct TripDetailsView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(red: 0.06, green: 0.09, blue: 0.23)) // Dark navy color
+                    .background(Color(red: 0.06, green: 0.09, blue: 0.23))
                     .cornerRadius(12)
                     
-                    // Hotels Card - Very light blue background
+                    // Hotels Section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Hotels")
                             .font(.system(size: 17, weight: .semibold))
@@ -155,10 +144,10 @@ struct TripDetailsView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.blue.opacity(0.1)) // Very light blue background
+                    .background(Color.blue.opacity(0.1))
                     .cornerRadius(12)
                     
-                    // Flights Card - Blue background with white button
+                    // Flights Section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Flights")
                             .font(.system(size: 17, weight: .semibold))
@@ -193,16 +182,29 @@ struct TripDetailsView: View {
                 }
             }
         }
+        .alert("Delete Trip", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                // Handle delete action
+            }
+        } message: {
+            Text("Are you sure you want to delete this trip? This action cannot be undone.")
+        }
+        .alert("Trip Collaboration", isPresented: $showCollaborationAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Trip collaboration feature coming soon!")
+        }
     }
 }
 
-#Preview("TripDetailsView - Light Mode") {
+#Preview("TripDetailsView") {
     NavigationStack {
         TripDetailsView(
             trip: Trip(
                 id: "1",
-                name: "Annual leave",
-                destination: "Laghouat, Algeria",
+                name: "Bahamas Family Trip",
+                destination: "Nassau, Bahamas",
                 date: Date(),
                 endDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
                 details: "Going on my annual leave holiday with my family",
@@ -210,11 +212,12 @@ struct TripDetailsView: View {
                 images: [],
                 location: Location(
                     id: "1",
-                    name: "Laghouat",
-                    country: "Algeria",
-                    flag: "🇩🇿",
-                    subtitle: "Laghouat"
-                )
+                    name: "Nassau",
+                    country: "Bahamas",
+                    flag: "🇧🇸",
+                    subtitle: "Paradise Island"
+                ),
+                travelStyle: .family // Add this line
             )
         )
     }

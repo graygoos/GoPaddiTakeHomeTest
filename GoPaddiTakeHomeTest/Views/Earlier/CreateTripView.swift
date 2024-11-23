@@ -125,7 +125,7 @@ struct CreateTripView: View {
     }
 }
 
-enum TravelStyle: String, CaseIterable, Identifiable {
+enum TravelStyle: String, CaseIterable, Identifiable, Codable {
     case solo = "Solo"
     case couple = "Couple"
     case family = "Family"
