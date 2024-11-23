@@ -8,53 +8,44 @@
 import SwiftUI
 
 struct TripDetailsView: View {
-    let trip: Trip  // Change to accept Trip instead of individual properties
+    let trip: Trip
     @Environment(\.dismiss) private var dismiss
+    @State private var showDeleteAlert = false
+    @State private var showCollaborationAlert = false
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Header Image with Gradient Overlay
+                // Header Image without text overlay
                 if let location = trip.location {
-                    ZStack(alignment: .bottom) {
-                        Image(location.name)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(height: 300)
-                            .clipped()
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(trip.name)
-                                .font(.title)
-                                .fontWeight(.bold)
-                            Text("\(location.name), \(location.country)")
-                                .font(.headline)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .background(
-                            LinearGradient(
-                                colors: [.black.opacity(0.7), .clear],
-                                startPoint: .bottom,
-                                endPoint: .top
-                            )
-                        )
-                        .foregroundColor(.white)
-                    }
+                    Image(location.name)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 300)
+                        .clipped()
                 }
                 
-                VStack(spacing: 24) {
-                    // Dates
+                VStack(alignment: .leading, spacing: 16) {
+                    // Date with calendar icon
                     if let endDate = trip.endDate {
-                        DetailRow(
-                            icon: "calendar",
-                            iconColor: .blue,
-                            title: "Dates",
-                            detail: formatDateRange(start: trip.date, end: endDate)
-                        )
+                        HStack(spacing: 8) {
+                            Image(systemName: "calendar")
+                                .foregroundColor(.secondary)
+                            Text(trip.date.formatted(date: .abbreviated, time: .omitted))
+                                .foregroundColor(.secondary)
+                            Image(systemName: "arrow.right")
+                                .foregroundColor(.secondary)
+                            Text(endDate.formatted(date: .abbreviated, time: .omitted))
+                                .foregroundColor(.secondary)
+                        }
+                        .font(.system(size: 15))
                     }
                     
-                    // Location
+                    // Trip name
+                    Text(trip.name)
+                        .font(.system(size: 24, weight: .bold))
+                    
+                    // Location and travel style
                     if let location = trip.location {
                         DetailRow(
                             icon: "location.fill",
@@ -73,25 +64,121 @@ struct TripDetailsView: View {
                     }
                     
                     // Action Buttons
-                    VStack(spacing: 16) {
-                        ActionButton(
-                            title: "Add Activities",
-                            subtitle: "Build, personalize, and optimize your itineraries with our trip planner",
-                            action: { print("Add Activities") }
-                        )
+                    HStack(spacing: 12) {
+                        Button {
+                            showCollaborationAlert = true
+                        } label: {
+                            HStack {
+                                Image("handshake")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20)
+                                Text("Trip Collaboration")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
+                        }
                         
-                        ActionButton(
-                            title: "Add Hotels",
-                            subtitle: "Find and book the perfect place to stay",
-                            action: { print("Add Hotels") }
-                        )
+                        // Using ShareLink for sharing
+                        ShareLink(
+                            item: "Check out my trip to \(trip.location?.name ?? "")",
+                            subject: Text("Trip Details"),
+                            message: Text("I'm planning a trip to \(trip.location?.name ?? "") from \(trip.date.formatted(date: .abbreviated, time: .omitted)) to \(trip.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "")")
+                        ) {
+                            HStack {
+                                Image(systemName: "arrowshape.turn.up.forward")
+                                Text("Share Trip")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
+                        }
                         
-                        ActionButton(
-                            title: "Add Flights",
-                            subtitle: "Search and compare flight options",
-                            action: { print("Add Flights") }
-                        )
+                        Menu {
+                            Button(role: .destructive) {
+                                showDeleteAlert = true
+                            } label: {
+                                Label("Delete Trip", systemImage: "trash")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .foregroundColor(.primary)
+                                .frame(width: 40, height: 40)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
+                        }
                     }
+                    .padding(.vertical, 8)
+                    
+                    // Activities Card - Dark navy background
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Activities")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Build, personalize, and optimize your itineraries with our trip planner.")
+                            .font(.system(size: 15))
+                            .foregroundColor(.white.opacity(0.8))
+                        Button("Add Activities") {
+                            // Handle add activities
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.2))
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(red: 0.06, green: 0.09, blue: 0.23)) // Dark navy color
+                    .cornerRadius(12)
+                    
+                    // Hotels Card - Very light blue background
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Hotels")
+                            .font(.system(size: 17, weight: .semibold))
+                        Text("Build, personalize, and optimize your itineraries with our trip planner.")
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                        Button("Add Hotels") {
+                            // Handle add hotels
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.blue.opacity(0.1)) // Very light blue background
+                    .cornerRadius(12)
+                    
+                    // Flights Card - Blue background with white button
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Flights")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Build, personalize, and optimize your itineraries with our trip planner.")
+                            .font(.system(size: 15))
+                            .foregroundColor(.white.opacity(0.8))
+                        Button("Add Flights") {
+                            // Handle add flights
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white)
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.blue)
+                    .cornerRadius(12)
                 }
                 .padding()
             }
@@ -105,24 +192,7 @@ struct TripDetailsView: View {
                         .foregroundColor(.white)
                 }
             }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button("Trip Collaboration", action: {})
-                    Button("Share Trip", action: {})
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(.white)
-                }
-            }
         }
-    }
-    
-    private func formatDateRange(start: Date, end: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
     }
 }
 
