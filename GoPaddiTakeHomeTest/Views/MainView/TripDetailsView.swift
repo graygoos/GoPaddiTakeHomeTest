@@ -10,6 +10,7 @@ import SwiftUI
 struct TripDetailsView: View {
     @StateObject private var viewModel: TripDetailsViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) var presentationMode
     @State private var showDeleteAlert = false
     @State private var showCollaborationAlert = false
     @State private var showAddFlight = false
@@ -294,7 +295,11 @@ struct TripDetailsView: View {
         .alert("Delete Trip", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
-                // Handle delete action
+                let deleted = viewModel.deleteTrip()
+                if deleted {
+                    // Dismiss all the way back to root
+                    presentationMode.wrappedValue.dismiss()
+                }
             }
         } message: {
             Text("Are you sure you want to delete this trip? This action cannot be undone.")

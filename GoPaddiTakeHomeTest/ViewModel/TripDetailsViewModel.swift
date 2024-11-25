@@ -70,4 +70,9 @@ class TripDetailsViewModel: ObservableObject {
     func removeActivity(at indexSet: IndexSet) {
         activities.remove(atOffsets: indexSet)
     }
+    
+    func deleteTrip() -> Bool {
+        tripStore.deleteTrip(trip.id)
+        return true
+    }
 }

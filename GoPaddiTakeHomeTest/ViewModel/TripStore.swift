@@ -35,4 +35,9 @@ class TripStore: ObservableObject {
             saveTrips()
         }
     }
+    
+    func deleteTrip(_ tripId: String) {
+        trips.removeAll { $0.id == tripId }
+        saveTrips()
+    }
 }
