@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FlightCard: View {
     let flight: Flight
+    var onRemove: () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -16,7 +17,6 @@ struct FlightCard: View {
             VStack(spacing: 16) {
                 // Airline Info
                 HStack(spacing: 8) {
-                    // Placeholder for airline logo
                     Circle()
                         .fill(Color.gray.opacity(0.1))
                         .frame(width: 32, height: 32)
@@ -70,66 +70,70 @@ struct FlightCard: View {
                     }
                 }
                 
-                // Action buttons
+                // Action buttons and price
                 HStack {
-                    Button("Flight details") {
-                        // Handle flight details
-                    }
-                    .buttonStyle(.plain)
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                    
-                    Button("Price details") {
-                        // Handle price details
-                    }
-                    .buttonStyle(.plain)
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                    
-                    Button("Edit details") {
-                        // Handle edit details
-                    }
-                    .buttonStyle(.plain)
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
+                    ActionLink(title: "Flight details")
+                    ActionLink(title: "Price details")
+                    ActionLink(title: "Edit details")
                     
                     Spacer()
                     
                     Text("₦\(flight.price, specifier: "%.2f")")
                         .font(.headline)
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 4)
             }
             .padding()
             .background(Color.white)
             
             // Remove button
-            Button {
-                // Handle remove
-            } label: {
+            Button(action: onRemove) {
                 Text("Remove")
                     .foregroundColor(.red)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
+                    .background(Color.red.opacity(0.1))
             }
-            .background(Color.red.opacity(0.1))
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(radius: 2)
     }
 }
 
-#Preview("Flight Card") {
-    FlightCard(flight: Flight(
-        id: "1",
-        airline: "American Airlines",
-        flightNumber: "AA-829",
-        departureTime: Date(),
-        arrivalTime: Date().addingTimeInterval(6300), // 1h 45m
-        origin: "LOS",
-        destination: "SIN",
-        price: 123450.00
-    ))
-    .padding()
+#Preview("FlightCard - Various States") {
+    ScrollView {
+        VStack(spacing: 20) {
+            // Regular flight
+            FlightCard(
+                flight: Flight(
+                    id: "1",
+                    airline: "American Airlines",
+                    flightNumber: "AA-829",
+                    departureTime: Date(),
+                    arrivalTime: Date().addingTimeInterval(6300), // 1h 45m
+                    origin: "LOS",
+                    destination: "SIN",
+                    price: 123450.00
+                )
+            ) {
+                print("Remove tapped")
+            }
+            
+            // Long duration flight
+            FlightCard(
+                flight: Flight(
+                    id: "2",
+                    airline: "Emirates",
+                    flightNumber: "EK-801",
+                    departureTime: Date(),
+                    arrivalTime: Date().addingTimeInterval(28800), // 8h
+                    origin: "DXB",
+                    destination: "JFK",
+                    price: 245000.00
+                )
+            ) {
+                print("Remove tapped")
+            }
+        }
+        .padding()
+    }
 }

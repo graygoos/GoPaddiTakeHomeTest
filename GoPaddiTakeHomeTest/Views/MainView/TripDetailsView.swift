@@ -191,34 +191,46 @@ struct TripDetailsView: View {
                         
                         // Flights
                         if viewModel.flights.isEmpty {
-                            EmptyStateCard(type: .flights, onAdd: {
+                            EmptyStateCard(type: .flights) {
                                 showAddFlight = true
-                            })
+                            }
                         } else {
                             ForEach(viewModel.flights) { flight in
-                                FlightCard(flight: flight)
+                                FlightCard(flight: flight) {
+                                    if let index = viewModel.flights.firstIndex(where: { $0.id == flight.id }) {
+                                        viewModel.removeFlight(at: IndexSet(integer: index))
+                                    }
+                                }
                             }
                         }
                         
                         // Hotels
                         if viewModel.hotels.isEmpty {
-                            EmptyStateCard(type: .hotels, onAdd: {
+                            EmptyStateCard(type: .hotels) {
                                 showAddHotel = true
-                            })
+                            }
                         } else {
                             ForEach(viewModel.hotels) { hotel in
-                                HotelCard(hotel: hotel)
+                                HotelCard(hotel: hotel) {
+                                    if let index = viewModel.hotels.firstIndex(where: { $0.id == hotel.id }) {
+                                        viewModel.removeHotel(at: IndexSet(integer: index))
+                                    }
+                                }
                             }
                         }
                         
                         // Activities
                         if viewModel.activities.isEmpty {
-                            EmptyStateCard(type: .activities, onAdd: {
+                            EmptyStateCard(type: .activities) {
                                 showAddActivity = true
-                            })
+                            }
                         } else {
                             ForEach(viewModel.activities) { activity in
-                                ActivityCard(activity: activity)
+                                ActivityCard(activity: activity) {
+                                    if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
+                                        viewModel.removeActivity(at: IndexSet(integer: index))
+                                    }
+                                }
                             }
                         }
                     }
