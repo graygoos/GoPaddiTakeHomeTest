@@ -168,6 +168,22 @@ struct TripDetailsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.blue)
                     .cornerRadius(12)
+                    
+                    // Trip Itineraries Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Trip Itineraries")
+                            .font(.headline)
+                        Text("Your Trip itineraries are placed here")
+                            .foregroundColor(.secondary)
+                        
+                        // Empty State Cards
+                        VStack(spacing: 16) {
+                            EmptyStateCard(type: .flights)
+                            EmptyStateCard(type: .hotels)
+                            EmptyStateCard(type: .activities)
+                        }
+                    }
+                    .padding(.top, 24)
                 }
                 .padding()
             }
@@ -217,7 +233,7 @@ struct TripDetailsView: View {
                     flag: "🇧🇸",
                     subtitle: "Paradise Island"
                 ),
-                travelStyle: .family // Add this line
+                travelStyle: .family
             )
         )
     }
