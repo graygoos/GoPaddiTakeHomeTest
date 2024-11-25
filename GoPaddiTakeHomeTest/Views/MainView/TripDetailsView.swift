@@ -197,7 +197,7 @@ struct TripDetailsView: View {
                             }
                         } else {
                             ForEach(viewModel.flights) { flight in
-                                FlightCard(flight: flight) {
+                                FlightCardSection(flight: flight) {
                                     if let index = viewModel.flights.firstIndex(where: { $0.id == flight.id }) {
                                         viewModel.removeFlight(at: IndexSet(integer: index))
                                     }
@@ -212,7 +212,7 @@ struct TripDetailsView: View {
                             }
                         } else {
                             ForEach(viewModel.hotels) { hotel in
-                                HotelCard(hotel: hotel) {
+                                HotelCardSection(hotel: hotel) {
                                     if let index = viewModel.hotels.firstIndex(where: { $0.id == hotel.id }) {
                                         viewModel.removeHotel(at: IndexSet(integer: index))
                                     }
@@ -227,7 +227,7 @@ struct TripDetailsView: View {
                             }
                         } else {
                             ForEach(viewModel.activities) { activity in
-                                ActivityCard(activity: activity) {
+                                ActivityCardSection(activity: activity) {
                                     if let index = viewModel.activities.firstIndex(where: { $0.id == activity.id }) {
                                         viewModel.removeActivity(at: IndexSet(integer: index))
                                     }

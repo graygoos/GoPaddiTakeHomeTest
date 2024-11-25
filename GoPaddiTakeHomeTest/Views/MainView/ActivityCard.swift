@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ActivityCard: View {
     let activity: Activity
-    @State private var currentImageIndex = 0
     var onRemove: () -> Void
+    @State private var currentImageIndex = 0
+    @State private var showRemoveAlert = false
     
-    // Generate activity images array
     private var activityImages: [String] {
         ["activity-1", "activity-2", "activity-3", "activity-4"]
     }
@@ -20,127 +20,187 @@ struct ActivityCard: View {
     var body: some View {
         VStack(spacing: 0) {
             // Image carousel
-            ImageCarouselView(
-                images: activityImages,
-                currentIndex: $currentImageIndex,
-                height: 200
-            )
+            ZStack {
+                if let imageName = activityImages[safe: currentImageIndex] {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .clipped()
+                }
+                
+                // Navigation arrows
+                HStack {
+                    Button {
+                        withAnimation {
+                            currentImageIndex = (currentImageIndex - 1 + activityImages.count) % activityImages.count
+                        }
+                    } label: {
+                        CircleButton(icon: "chevron.left")
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            currentImageIndex = (currentImageIndex + 1) % activityImages.count
+                        }
+                    } label: {
+                        CircleButton(icon: "chevron.right")
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
             
             // Activity details
             VStack(alignment: .leading, spacing: 12) {
+                // Title and description
                 Text(activity.name)
-                    .font(.headline)
-                
+                    .font(.system(size: 20, weight: .semibold))
                 Text(activity.description)
-                    .font(.subheadline)
+                    .font(.system(size: 16))
                     .foregroundColor(.white.opacity(0.8))
                 
-                // Location and details
+                // Location, rating, and duration
                 HStack(spacing: 16) {
-                    Label(activity.location, systemImage: "mappin.circle.fill")
+                    Label(activity.location, systemImage: "mappin.circle")
                     
-                    HStack {
+                    HStack(spacing: 4) {
                         Image(systemName: "star.fill")
                             .foregroundColor(.yellow)
-                        Text("\(activity.rating, specifier: "%.1f")")
+                        Text(String(format: "%.1f", activity.rating))
                         Text("(\(activity.reviews))")
                             .foregroundColor(.white.opacity(0.8))
                     }
                     
                     Label(activity.duration, systemImage: "clock")
                 }
-                .font(.subheadline)
+                .font(.system(size: 14))
                 
-                // Time slot
-                HStack(spacing: 16) {
+                // Time slot and day
+                HStack(spacing: 12) {
                     Button("Change time") {
                         // Handle time change
                     }
+                    .font(.system(size: 14))
                     .foregroundColor(.white)
                     .underline()
                     
                     Text(activity.timeSlot.formatted(date: .omitted, time: .shortened))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
                         .background(Color.white.opacity(0.2))
-                        .cornerRadius(4)
+                        .cornerRadius(8)
                     
                     Text(activity.day)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
                         .background(Color.white.opacity(0.2))
-                        .cornerRadius(4)
+                        .cornerRadius(8)
                 }
-                .font(.subheadline)
+                .font(.system(size: 14))
                 
-                // Action buttons and price
+                // Action links and price
                 HStack {
-                    ActionLink(title: "Activity details", color: .white)
-                    ActionLink(title: "Price details", color: .white)
-                    ActionLink(title: "Edit details", color: .white)
-                    
+                    ForEach(["Activity details", "Price details", "Edit details"], id: \.self) { text in
+                        Button(action: {}) {
+                            Text(text)
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                        }
+                        if text != "Edit details" {
+                            Spacer()
+                        }
+                    }
+                }
+                
+                HStack {
                     Spacer()
-                    
                     Text("₦\(activity.price, specifier: "%.2f")")
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .semibold))
                 }
             }
-            .padding()
+            .padding(16)
             .background(Color.blue)
-            .foregroundColor(.white)
             
             // Remove button
-            Button(action: onRemove) {
-                Text("Remove")
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1))
+            Button {
+                showRemoveAlert = true
+            } label: {
+                HStack {
+                    Text("Remove")
+                        .foregroundColor(.red)
+                    Image(systemName: "xmark")
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.red.opacity(0.1))
             }
         }
+        .background(Color.blue)
+        .foregroundColor(.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .modifier(RemoveAlertModifier(
+            showAlert: $showRemoveAlert,
+            title: "Remove Activity",
+            message: "Are you sure you want to remove this activity?",
+            onConfirm: onRemove
+        ))
     }
 }
 
-#Preview("ActivityCard - Various States") {
+#Preview("All Cards") {
     ScrollView {
         VStack(spacing: 20) {
-            // Museum activity
+            FlightCard(
+                flight: Flight(
+                    id: "1",
+                    airline: "American Airlines",
+                    flightNumber: "AA-829",
+                    departureTime: Date(),
+                    arrivalTime: Date().addingTimeInterval(6300),
+                    origin: "LOS",
+                    destination: "SIN",
+                    price: 123450.00
+                )
+            ) {
+                print("Flight removed")
+            }
+            
+            HotelCard(
+                hotel: Hotel(
+                    id: "1",
+                    name: "Ritz Carlton",
+                    address: "Fifth Avenue",
+                    rating: 5.0,
+                    reviews: 1000,
+                    roomType: "Double Suite",
+                    checkIn: Date(),
+                    checkOut: Date().addingTimeInterval(86400 * 10),
+                    price: 20.00,
+                    images: []
+                )
+            ) {
+                print("Hotel removed")
+            }
+            
             ActivityCard(
                 activity: Activity(
                     id: "1",
-                    name: "The Museum of Modern Art",
-                    description: "Works from Van Gogh to Warhol & beyond plus a sculpture garden, 2 cafes & The modern restaurant",
-                    location: "Melbourne, Australia",
-                    rating: 8.5,
-                    reviews: 436,
-                    duration: "1 hour",
+                    name: "Surfing",
+                    description: "Surfing at the private beach",
+                    location: "Staten Island",
+                    rating: 5.0,
+                    reviews: 1000,
+                    duration: "2 days",
                     timeSlot: Date(),
                     day: "Day 1 (Activity 1)",
-                    price: 123450.00,
+                    price: 12.00,
                     images: []
                 )
             ) {
-                print("Remove tapped")
-            }
-            
-            // Tour activity
-            ActivityCard(
-                activity: Activity(
-                    id: "2",
-                    name: "City Walking Tour",
-                    description: "Explore the historic city center with a professional guide, visiting key landmarks and hidden gems",
-                    location: "Sydney, Australia",
-                    rating: 4.8,
-                    reviews: 129,
-                    duration: "2.5 hours",
-                    timeSlot: Date().addingTimeInterval(3600 * 24), // Next day
-                    day: "Day 2 (Activity 1)",
-                    price: 75000.00,
-                    images: []
-                )
-            ) {
-                print("Remove tapped")
+                print("Activity removed")
             }
         }
         .padding()

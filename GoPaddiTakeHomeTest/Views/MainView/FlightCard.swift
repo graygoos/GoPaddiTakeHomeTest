@@ -10,92 +10,117 @@ import SwiftUI
 struct FlightCard: View {
     let flight: Flight
     var onRemove: () -> Void
+    @State private var showRemoveAlert = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Content
+            // Main content
             VStack(spacing: 16) {
-                // Airline Info
-                HStack(spacing: 8) {
+                // Airline and flight number
+                HStack {
                     Circle()
-                        .fill(Color.gray.opacity(0.1))
+                        .fill(Color.gray.opacity(0.2))
                         .frame(width: 32, height: 32)
-                    
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(flight.airline)
-                            .font(.headline)
+                            .font(.system(size: 16, weight: .medium))
                         Text(flight.flightNumber)
-                            .font(.subheadline)
+                            .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                // Flight Route
+                // Flight times and route
                 HStack {
                     // Departure
                     VStack(alignment: .leading) {
                         Text(flight.departureTime.formatted(date: .omitted, time: .shortened))
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 24, weight: .medium))
                         Text(flight.departureTime.formatted(date: .abbreviated, time: .omitted))
-                            .font(.subheadline)
+                            .font(.system(size: 14))
                             .foregroundColor(.secondary)
                         Text(flight.origin)
-                            .font(.headline)
+                            .font(.system(size: 16, weight: .medium))
                     }
                     
-                    // Flight duration
-                    VStack {
+                    Spacer()
+                    
+                    // Duration
+                    VStack(spacing: 4) {
+                        Image(systemName: "airplane")
+                            .font(.system(size: 14))
                         Text(flight.duration)
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(4)
+                            .font(.system(size: 12))
                     }
-                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(12)
+                    
+                    Spacer()
                     
                     // Arrival
                     VStack(alignment: .trailing) {
                         Text(flight.arrivalTime.formatted(date: .omitted, time: .shortened))
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 24, weight: .medium))
                         Text(flight.arrivalTime.formatted(date: .abbreviated, time: .omitted))
-                            .font(.subheadline)
+                            .font(.system(size: 14))
                             .foregroundColor(.secondary)
                         Text(flight.destination)
-                            .font(.headline)
+                            .font(.system(size: 16, weight: .medium))
                     }
                 }
                 
-                // Action buttons and price
+                // Action links
                 HStack {
-                    ActionLink(title: "Flight details")
-                    ActionLink(title: "Price details")
-                    ActionLink(title: "Edit details")
-                    
+                    ForEach(["Flight details", "Price details", "Edit details"], id: \.self) { text in
+                        Button(action: {}) {
+                            Text(text)
+                                .font(.system(size: 14))
+                                .foregroundColor(.blue)
+                        }
+                        if text != "Edit details" {
+                            Spacer()
+                        }
+                    }
+                }
+                
+                // Price
+                HStack {
                     Spacer()
-                    
                     Text("₦\(flight.price, specifier: "%.2f")")
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .medium))
                 }
             }
-            .padding()
+            .padding(16)
             .background(Color.white)
             
             // Remove button
-            Button(action: onRemove) {
-                Text("Remove")
-                    .foregroundColor(.red)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.red.opacity(0.1))
+            Button {
+                showRemoveAlert = true
+            } label: {
+                HStack {
+                    Text("Remove")
+                        .foregroundColor(.red)
+                    Image(systemName: "xmark")
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.red.opacity(0.1))
             }
         }
+        .modifier(RemoveAlertModifier(
+            showAlert: $showRemoveAlert,
+            title: "Remove Flight",
+            message: "Are you sure you want to remove this flight?",
+            onConfirm: onRemove
+        ))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(radius: 2)
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 

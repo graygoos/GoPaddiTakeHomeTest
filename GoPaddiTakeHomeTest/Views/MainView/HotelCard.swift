@@ -11,8 +11,8 @@ struct HotelCard: View {
     let hotel: Hotel
     @State private var currentImageIndex = 0
     var onRemove: () -> Void
+    @State private var showRemoveAlert = false
     
-    // Generate hotel images array
     private var hotelImages: [String] {
         ["hotel-1", "hotel-2", "hotel-3", "hotel-4"]
     }
@@ -20,77 +20,133 @@ struct HotelCard: View {
     var body: some View {
         VStack(spacing: 0) {
             // Image carousel
-            ImageCarouselView(
-                images: hotelImages,
-                currentIndex: $currentImageIndex,
-                height: 200
-            )
+            ZStack {
+                // Image
+                if let imageName = hotelImages[safe: currentImageIndex] {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .clipped()
+                }
+                
+                // Navigation arrows
+                HStack {
+                    Button {
+                        withAnimation {
+                            currentImageIndex = (currentImageIndex - 1 + hotelImages.count) % hotelImages.count
+                        }
+                    } label: {
+                        CircleButton(icon: "chevron.left")
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            currentImageIndex = (currentImageIndex + 1) % hotelImages.count
+                        }
+                    } label: {
+                        CircleButton(icon: "chevron.right")
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
             
             // Hotel details
             VStack(alignment: .leading, spacing: 12) {
+                // Name and address
                 Text(hotel.name)
-                    .font(.headline)
-                
+                    .font(.system(size: 16, weight: .medium))
                 Text(hotel.address)
-                    .font(.subheadline)
+                    .font(.system(size: 14))
                     .foregroundColor(.secondary)
                 
                 // Rating and amenities
                 HStack(spacing: 16) {
-                    Button {
-                        // Show map
-                    } label: {
+                    Button(action: {}) {
                         Label("Show in map", systemImage: "map")
+                            .font(.system(size: 14))
                             .foregroundColor(.blue)
                     }
                     
-                    HStack {
+                    HStack(spacing: 4) {
                         Image(systemName: "star.fill")
                             .foregroundColor(.yellow)
-                        Text("\(hotel.rating, specifier: "%.1f")")
+                        Text(String(format: "%.1f", hotel.rating))
                         Text("(\(hotel.reviews))")
                             .foregroundColor(.secondary)
                     }
+                    .font(.system(size: 14))
                     
-                    Label(hotel.roomType, systemImage: "bed.double")
+                    HStack(spacing: 4) {
+                        Image(systemName: "bed.double")
+                        Text(hotel.roomType)
+                    }
+                    .font(.system(size: 14))
                 }
-                .font(.subheadline)
                 
                 // Dates
                 HStack(spacing: 16) {
-                    Label("In: \(hotel.checkIn.formatted(date: .numeric, time: .omitted))",
-                          systemImage: "calendar")
+                    Label {
+                        Text("In: \(hotel.checkIn.formatted(date: .numeric, time: .omitted))")
+                    } icon: {
+                        Image(systemName: "calendar")
+                    }
                     
-                    Label("Out: \(hotel.checkOut.formatted(date: .numeric, time: .omitted))",
-                          systemImage: "calendar")
+                    Label {
+                        Text("Out: \(hotel.checkOut.formatted(date: .numeric, time: .omitted))")
+                    } icon: {
+                        Image(systemName: "calendar")
+                    }
                 }
-                .font(.subheadline)
+                .font(.system(size: 14))
                 
-                // Action buttons and price
+                // Action links and price
                 HStack {
-                    ActionLink(title: "Hotel details")
-                    ActionLink(title: "Price details")
-                    ActionLink(title: "Edit details")
-                    
+                    ForEach(["Hotel details", "Price details", "Edit details"], id: \.self) { text in
+                        Button(action: {}) {
+                            Text(text)
+                                .font(.system(size: 14))
+                                .foregroundColor(.blue)
+                        }
+                        if text != "Edit details" {
+                            Spacer()
+                        }
+                    }
+                }
+                
+                HStack {
                     Spacer()
-                    
                     Text("₦\(hotel.price, specifier: "%.2f")")
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .medium))
                 }
             }
-            .padding()
-            .background(Color(hex: "0D1139"))
-            .foregroundColor(.white)
+            .padding(16)
             
             // Remove button
-            Button(action: onRemove) {
-                Text("Remove")
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1))
+            Button {
+                showRemoveAlert = true
+            } label: {
+                HStack {
+                    Text("Remove")
+                        .foregroundColor(.red)
+                    Image(systemName: "xmark")
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.red.opacity(0.1))
             }
         }
+        .modifier(RemoveAlertModifier(
+            showAlert: $showRemoveAlert,
+            title: "Remove Hotel",
+            message: "Are you sure you want to remove this hotel?",
+            onConfirm: onRemove
+        ))
+        .background(Color(hex: "0D1139"))
+        .foregroundColor(.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
