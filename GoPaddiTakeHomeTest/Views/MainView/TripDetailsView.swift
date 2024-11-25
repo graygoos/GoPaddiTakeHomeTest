@@ -38,10 +38,10 @@ struct TripDetailsView: View {
                     if let endDate = viewModel.trip.endDate {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar")
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             Text(viewModel.trip.date.formatted(date: .long, time: .omitted))
                             Image(systemName: "arrow.right")
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             Text(endDate.formatted(date: .long, time: .omitted))
                         }
                         .font(.system(size: 15))
@@ -55,7 +55,7 @@ struct TripDetailsView: View {
                     if let location = viewModel.trip.location {
                         Text("\(location.name), \(location.country) \(location.flag) | \(viewModel.trip.travelStyle.rawValue) Trip")
                             .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     
                     // Action Buttons Row
@@ -74,7 +74,7 @@ struct TripDetailsView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(Color.blue.opacity(0.1))
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                             .cornerRadius(8)
                         }
                         
@@ -91,7 +91,7 @@ struct TripDetailsView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(Color.blue.opacity(0.1))
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                             .cornerRadius(8)
                         }
                         
@@ -104,7 +104,7 @@ struct TripDetailsView: View {
                             }
                         } label: {
                             Image(systemName: "ellipsis")
-                                .foregroundColor(.primary)
+                                .foregroundStyle(.primary)
                                 .frame(width: 40, height: 40)
                                 .background(Color.blue.opacity(0.1))
                                 .cornerRadius(8)
@@ -116,18 +116,18 @@ struct TripDetailsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Activities")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundStyle(.white.opacity(0.8))
                         Button {
                             showAddActivity = true
                         } label: {
                             Text("Add Activities")
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
-                                .background(Color.white.opacity(0.2))
-                                .foregroundColor(.white)
+                                .background(Color.blue)
+                                .foregroundStyle(.white)
                                 .cornerRadius(8)
                         }
                     }
@@ -142,7 +142,7 @@ struct TripDetailsView: View {
                             .font(.system(size: 17, weight: .semibold))
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Button {
                             showAddHotel = true
                         } label: {
@@ -150,7 +150,7 @@ struct TripDetailsView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.blue)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .cornerRadius(8)
                         }
                     }
@@ -163,10 +163,10 @@ struct TripDetailsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Flights")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundStyle(.white.opacity(0.8))
                         Button {
                             showAddFlight = true
                         } label: {
@@ -174,7 +174,7 @@ struct TripDetailsView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.white)
-                                .foregroundColor(.blue)
+                                .foregroundStyle(.blue)
                                 .cornerRadius(8)
                         }
                     }
@@ -188,7 +188,7 @@ struct TripDetailsView: View {
                         Text("Trip Itineraries")
                             .font(.headline)
                         Text("Your Trip itineraries are placed here")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         
                         // Flights
                         if viewModel.flights.isEmpty {
@@ -246,7 +246,7 @@ struct TripDetailsView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
             }
         }
@@ -259,7 +259,7 @@ struct TripDetailsView: View {
                     // Add flight icon if needed
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "airplane")
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                     }
                 }
             }
@@ -273,7 +273,7 @@ struct TripDetailsView: View {
                     // Hotel icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "building.2")
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                     }
                 }
             }
@@ -287,7 +287,7 @@ struct TripDetailsView: View {
                     // Activity icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "figure.hiking")
-                            .foregroundColor(.blue)
+                            .foregroundStyle(.blue)
                     }
                 }
             }
