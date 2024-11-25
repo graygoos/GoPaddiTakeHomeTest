@@ -243,12 +243,6 @@ struct TripDetailsView: View {
                     viewModel.addFlight(flight)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { showAddFlight = false }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.primary)
-                        }
-                    }
                     // Add flight icon if needed
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "airplane")
@@ -263,13 +257,7 @@ struct TripDetailsView: View {
                     viewModel.addHotel(hotel)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { showAddHotel = false }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    // Add hotel icon if needed
+                    // Hotel icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "building.2")
                             .foregroundColor(.blue)
@@ -283,13 +271,7 @@ struct TripDetailsView: View {
                     viewModel.addActivity(activity)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { showAddActivity = false }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    // Add activity icon if needed
+                    // Activity icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "figure.hiking")
                             .foregroundColor(.blue)
