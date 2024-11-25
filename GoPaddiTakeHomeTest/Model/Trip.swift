@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Models
 struct Trip: Codable, Identifiable, Hashable {
     let id: String
     var name: String
