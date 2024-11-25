@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EmptyStateCard: View {
     let type: ItineraryType
+    let onAdd: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -40,14 +41,14 @@ struct EmptyStateCard: View {
                 }
                 
                 // Add button
-                Button(type.buttonTitle) {
-                    // Handle button action
+                Button(action: onAdd) {
+                    Text(type.buttonTitle)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.blue)
-                .foregroundStyle(Color.white)
-                .cornerRadius(8)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
@@ -58,6 +59,16 @@ struct EmptyStateCard: View {
         .background(type.backgroundColor)
         .cornerRadius(16)
     }
+}
+
+// Preview
+#Preview("EmptyStateCard") {
+    VStack(spacing: 20) {
+        EmptyStateCard(type: .flights, onAdd: {})
+        EmptyStateCard(type: .hotels, onAdd: {})
+        EmptyStateCard(type: .activities, onAdd: {})
+    }
+    .padding()
 }
 
 enum ItineraryType {
@@ -108,24 +119,5 @@ enum ItineraryType {
         case .hotels: return "hotel-empty-state"
         case .activities: return "activities-empty-state"
         }
-    }
-}
-
-#Preview("EmptyStateCard - All Cards") {
-    ScrollView {
-        VStack(spacing: 20) {
-            Text("Trip Itineraries")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Your Trip itineraries are placed here")
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            EmptyStateCard(type: .flights)
-            EmptyStateCard(type: .hotels)
-            EmptyStateCard(type: .activities)
-        }
-        .padding()
-        .background(Color(.systemBackground))
     }
 }

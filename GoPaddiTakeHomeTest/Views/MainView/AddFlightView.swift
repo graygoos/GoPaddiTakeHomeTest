@@ -2,7 +2,7 @@
 //  AddFlightView.swift
 //  GoPaddiTakeHomeTest
 //
-//  Created by Femi Aliu on 25/11/2024.
+//  Created by Femi Aliu
 //
 
 import SwiftUI
@@ -66,6 +66,23 @@ struct AddFlightView: View {
     }
 }
 
-#Preview {
-    AddFlightView()
+// Preview
+#Preview("AddFlightView - Empty") {
+    AddFlightView { flight in
+        print("Flight added: \(flight)")
+    }
+}
+
+#Preview("AddFlightView - Filled") {
+    let filledViewModel = AddFlightViewModel()
+    filledViewModel.airline = "American Airlines"
+    filledViewModel.flightNumber = "AA-829"
+    filledViewModel.origin = "LOS"
+    filledViewModel.destination = "SIN"
+    filledViewModel.price = 123450.00
+    
+    return AddFlightView { flight in
+        print("Flight added: \(flight)")
+    }
+    .environmentObject(filledViewModel)
 }

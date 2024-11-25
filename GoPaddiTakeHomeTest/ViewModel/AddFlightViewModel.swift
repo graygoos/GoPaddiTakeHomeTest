@@ -2,7 +2,7 @@
 //  AddFlightViewModel.swift
 //  GoPaddiTakeHomeTest
 //
-//  Created by Femi Aliu on 25/11/2024.
+//  Created by Femi Aliu
 //
 
 import SwiftUI

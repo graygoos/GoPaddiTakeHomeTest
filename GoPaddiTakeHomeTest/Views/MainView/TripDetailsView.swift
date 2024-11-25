@@ -8,16 +8,23 @@
 import SwiftUI
 
 struct TripDetailsView: View {
-    let trip: Trip
+    @StateObject private var viewModel: TripDetailsViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteAlert = false
     @State private var showCollaborationAlert = false
+    @State private var showAddFlight = false
+    @State private var showAddHotel = false
+    @State private var showAddActivity = false
+    
+    init(trip: Trip) {
+        _viewModel = StateObject(wrappedValue: TripDetailsViewModel(trip: trip))
+    }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 // Header Image
-                if let location = trip.location {
+                if let location = viewModel.trip.location {
                     Image(location.name)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -27,11 +34,11 @@ struct TripDetailsView: View {
                 
                 VStack(alignment: .leading, spacing: 16) {
                     // Trip Dates Row
-                    if let endDate = trip.endDate {
+                    if let endDate = viewModel.trip.endDate {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar")
                                 .foregroundColor(.secondary)
-                            Text(trip.date.formatted(date: .long, time: .omitted))
+                            Text(viewModel.trip.date.formatted(date: .long, time: .omitted))
                             Image(systemName: "arrow.right")
                                 .foregroundColor(.secondary)
                             Text(endDate.formatted(date: .long, time: .omitted))
@@ -40,12 +47,12 @@ struct TripDetailsView: View {
                     }
                     
                     // Trip Name
-                    Text(trip.name)
+                    Text(viewModel.trip.name)
                         .font(.system(size: 24, weight: .bold))
                     
                     // Location and Travel Style
-                    if let location = trip.location {
-                        Text("\(location.name), \(location.country) \(location.flag) | \(trip.travelStyle.rawValue) Trip")
+                    if let location = viewModel.trip.location {
+                        Text("\(location.name), \(location.country) \(location.flag) | \(viewModel.trip.travelStyle.rawValue) Trip")
                             .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
@@ -72,9 +79,9 @@ struct TripDetailsView: View {
                         
                         // Share Trip Button
                         ShareLink(
-                            item: "Check out my trip to \(trip.location?.name ?? "")",
+                            item: "Check out my trip to \(viewModel.trip.location?.name ?? "")",
                             subject: Text("Trip Details"),
-                            message: Text("I'm planning a trip to \(trip.location?.name ?? "") from \(trip.date.formatted(date: .abbreviated, time: .omitted)) to \(trip.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "")")
+                            message: Text("I'm planning a trip to \(viewModel.trip.location?.name ?? "") from \(viewModel.trip.date.formatted(date: .abbreviated, time: .omitted)) to \(viewModel.trip.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "")")
                         ) {
                             HStack {
                                 Image(systemName: "arrowshape.turn.up.forward")
@@ -112,18 +119,20 @@ struct TripDetailsView: View {
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
                             .foregroundColor(.white.opacity(0.8))
-                        Button("Add Activities") {
-                            // Handle add activities
+                        Button {
+                            showAddActivity = true
+                        } label: {
+                            Text("Add Activities")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.white.opacity(0.2))
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.white.opacity(0.2))
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(red: 0.06, green: 0.09, blue: 0.23))
+                    .background(Color(hex: "0D1139"))
                     .cornerRadius(12)
                     
                     // Hotels Section
@@ -133,14 +142,16 @@ struct TripDetailsView: View {
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
                             .foregroundColor(.secondary)
-                        Button("Add Hotels") {
-                            // Handle add hotels
+                        Button {
+                            showAddHotel = true
+                        } label: {
+                            Text("Add Hotels")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -155,14 +166,16 @@ struct TripDetailsView: View {
                         Text("Build, personalize, and optimize your itineraries with our trip planner.")
                             .font(.system(size: 15))
                             .foregroundColor(.white.opacity(0.8))
-                        Button("Add Flights") {
-                            // Handle add flights
+                        Button {
+                            showAddFlight = true
+                        } label: {
+                            Text("Add Flights")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.white)
+                                .foregroundColor(.blue)
+                                .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.white)
-                        .foregroundColor(.blue)
-                        .cornerRadius(8)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -176,11 +189,37 @@ struct TripDetailsView: View {
                         Text("Your Trip itineraries are placed here")
                             .foregroundColor(.secondary)
                         
-                        // Empty State Cards
-                        VStack(spacing: 16) {
-                            EmptyStateCard(type: .flights)
-                            EmptyStateCard(type: .hotels)
-                            EmptyStateCard(type: .activities)
+                        // Flights
+                        if viewModel.flights.isEmpty {
+                            EmptyStateCard(type: .flights, onAdd: {
+                                showAddFlight = true
+                            })
+                        } else {
+                            ForEach(viewModel.flights) { flight in
+                                FlightCard(flight: flight)
+                            }
+                        }
+                        
+                        // Hotels
+                        if viewModel.hotels.isEmpty {
+                            EmptyStateCard(type: .hotels, onAdd: {
+                                showAddHotel = true
+                            })
+                        } else {
+                            ForEach(viewModel.hotels) { hotel in
+                                HotelCard(hotel: hotel)
+                            }
+                        }
+                        
+                        // Activities
+                        if viewModel.activities.isEmpty {
+                            EmptyStateCard(type: .activities, onAdd: {
+                                showAddActivity = true
+                            })
+                        } else {
+                            ForEach(viewModel.activities) { activity in
+                                ActivityCard(activity: activity)
+                            }
                         }
                     }
                     .padding(.top, 24)
@@ -195,6 +234,66 @@ struct TripDetailsView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.white)
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showAddFlight) {
+            NavigationStack {
+                AddFlightView { flight in
+                    viewModel.addFlight(flight)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showAddFlight = false }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    // Add flight icon if needed
+                    ToolbarItem(placement: .principal) {
+                        Image(systemName: "airplane")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showAddHotel) {
+            NavigationStack {
+                AddHotelView { hotel in
+                    viewModel.addHotel(hotel)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showAddHotel = false }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    // Add hotel icon if needed
+                    ToolbarItem(placement: .principal) {
+                        Image(systemName: "building.2")
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showAddActivity) {
+            NavigationStack {
+                AddActivityView { activity in
+                    viewModel.addActivity(activity)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showAddActivity = false }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    // Add activity icon if needed
+                    ToolbarItem(placement: .principal) {
+                        Image(systemName: "figure.hiking")
+                            .foregroundColor(.blue)
+                    }
                 }
             }
         }
