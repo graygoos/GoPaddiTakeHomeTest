@@ -22,21 +22,20 @@ struct Trip: Codable, Identifiable, Hashable {
     var hotels: [Hotel]?
     var activities: [Activity]?
     
-    // Custom Coding Keys in case you need them
+    // Coding keys to ensure proper encoding/decoding
     private enum CodingKeys: String, CodingKey {
-        case id, name, destination, date, endDate, details, price, images, location, travelStyle
+        case id, name, destination, date, endDate, details, price, images, location, travelStyle, flights, hotels, activities
     }
     
-    // Implement Hashable
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
-    // Implement Equatable
     static func == (lhs: Trip, rhs: Trip) -> Bool {
         lhs.id == rhs.id
     }
 }
+
 
 struct TripDate: Equatable {
     var startDate: Date?

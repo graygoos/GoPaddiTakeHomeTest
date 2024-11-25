@@ -19,10 +19,11 @@ class TripPlanningViewModel: ObservableObject {
     @Published var trips: [Trip] = []
     @Published var newlyCreatedTrip: Trip?
     
-    private let tripsKey = "SavedTrips"
+    private let tripStore = TripStore.shared
     
     init() {
-        loadTrips()
+        // Initialize with trips from the store
+        self.trips = tripStore.trips
     }
     
     var currentTripName: String = ""
@@ -47,11 +48,16 @@ class TripPlanningViewModel: ObservableObject {
                 price: 0.0,
                 images: [],
                 location: location,
-                travelStyle: travelStyle // Add this line
+                travelStyle: travelStyle,
+                flights: [],
+                hotels: [],
+                activities: []
             )
             
-            trips.insert(newTrip, at: 0)
-            saveTrips()
+            tripStore.trips.insert(newTrip, at: 0)
+            tripStore.saveTrips()
+            
+            self.trips = tripStore.trips
             newlyCreatedTrip = newTrip
             showTripDetail = true
             resetFormData()
@@ -66,20 +72,8 @@ class TripPlanningViewModel: ObservableObject {
         currentTripDescription = ""
     }
     
-    private func saveTrips() {
-        if let encoded = try? JSONEncoder().encode(trips) {
-            UserDefaults.standard.set(encoded, forKey: tripsKey)
-        }
-    }
-    
-    private func loadTrips() {
-        if let savedTrips = UserDefaults.standard.data(forKey: tripsKey),
-           let decodedTrips = try? JSONDecoder().decode([Trip].self, from: savedTrips) {
-            trips = decodedTrips
-        }
-    }
-    
     func fetchTrips() {
-        loadTrips()
+        tripStore.loadTrips()
+        self.trips = tripStore.trips
     }
 }

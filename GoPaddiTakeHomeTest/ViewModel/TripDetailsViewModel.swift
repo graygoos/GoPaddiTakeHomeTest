@@ -8,16 +8,43 @@
 import SwiftUI
 
 class TripDetailsViewModel: ObservableObject {
-    @Published var trip: Trip
-    @Published var flights: [Flight] = []
-    @Published var hotels: [Hotel] = []
-    @Published var activities: [Activity] = []
+    @Published var trip: Trip {
+        didSet {
+            // Update the trip store whenever the trip changes
+            tripStore.updateTrip(trip)
+        }
+    }
+    @Published var flights: [Flight] = [] {
+        didSet {
+            updateTripWithCurrentState()
+        }
+    }
+    @Published var hotels: [Hotel] = [] {
+        didSet {
+            updateTripWithCurrentState()
+        }
+    }
+    @Published var activities: [Activity] = [] {
+        didSet {
+            updateTripWithCurrentState()
+        }
+    }
+    
+    private let tripStore = TripStore.shared
     
     init(trip: Trip) {
         self.trip = trip
         self.flights = trip.flights ?? []
         self.hotels = trip.hotels ?? []
         self.activities = trip.activities ?? []
+    }
+    
+    private func updateTripWithCurrentState() {
+        var updatedTrip = trip
+        updatedTrip.flights = flights
+        updatedTrip.hotels = hotels
+        updatedTrip.activities = activities
+        trip = updatedTrip
     }
     
     func addFlight(_ flight: Flight) {
