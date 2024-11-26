@@ -19,12 +19,13 @@ class TripPlanningViewModel: ObservableObject {
     @Published var trips: [Trip] = []
     @Published var newlyCreatedTrip: Trip?
     
-    private let tripStore = TripStore.shared
+    // API-related states
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    @Published var showError = false
     
-    init() {
-        // Initialize with trips from the store
-        self.trips = tripStore.trips
-    }
+    private let tripStore = TripStore.shared
+    private let apiService = APIService.shared
     
     var currentTripName: String = ""
     var currentTripStyle: TravelStyle = .solo
@@ -34,33 +35,62 @@ class TripPlanningViewModel: ObservableObject {
         selectedLocation != nil && tripDates.startDate != nil && tripDates.endDate != nil
     }
     
+    @MainActor
     func createDetailedTrip(name: String, travelStyle: TravelStyle, description: String) {
-        if let location = selectedLocation,
-           let startDate = tripDates.startDate,
-           let endDate = tripDates.endDate {
-            let newTrip = Trip(
-                id: UUID().uuidString,
-                name: name,
-                destination: "\(location.name), \(location.country)",
-                date: startDate,
-                endDate: endDate,
-                details: description,
-                price: 0.0,
-                images: [],
-                location: location,
-                travelStyle: travelStyle,
-                flights: [],
-                hotels: [],
-                activities: []
-            )
+        Task {
+            isLoading = true
             
-            tripStore.trips.insert(newTrip, at: 0)
-            tripStore.saveTrips()
+            do {
+                let newTrip = Trip(
+                    id: UUID().uuidString,
+                    name: name,
+                    destination: "\(selectedLocation?.name ?? ""), \(selectedLocation?.country ?? "")",
+                    date: tripDates.startDate ?? Date(),
+                    endDate: tripDates.endDate,
+                    details: description,
+                    price: 0.0,
+                    images: [],
+                    location: selectedLocation,
+                    travelStyle: travelStyle,
+                    flights: [],
+                    hotels: [],
+                    activities: []
+                )
+                
+                let createdTrip = try await apiService.createTrip(newTrip)
+                trips.insert(createdTrip, at: 0)
+                tripStore.trips = trips
+                tripStore.saveTrips()
+                newlyCreatedTrip = createdTrip
+                showTripDetail = true
+                resetFormData()
+            } catch let error as APIError {
+                errorMessage = error.userMessage
+                showError = true
+            } catch {
+                errorMessage = "An unexpected error occurred"
+                showError = true
+            }
             
-            self.trips = tripStore.trips
-            newlyCreatedTrip = newTrip
-            showTripDetail = true
-            resetFormData()
+            isLoading = false
+        }
+    }
+    
+    @MainActor
+    func fetchTrips() {
+        Task {
+            do {
+                isLoading = true
+                let trips = try await apiService.fetchTrips()
+                self.trips = trips
+            } catch let error as APIError {
+                errorMessage = error.userMessage
+                showError = true
+            } catch {
+                errorMessage = "Network error: The data couldn't be read because it isn't in the correct format."
+                showError = true
+            }
+            isLoading = false
         }
     }
     
@@ -70,10 +100,5 @@ class TripPlanningViewModel: ObservableObject {
         currentTripName = ""
         currentTripStyle = .solo
         currentTripDescription = ""
-    }
-    
-    func fetchTrips() {
-        tripStore.loadTrips()
-        self.trips = tripStore.trips
     }
 }

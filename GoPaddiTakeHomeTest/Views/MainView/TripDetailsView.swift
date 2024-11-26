@@ -256,7 +256,6 @@ struct TripDetailsView: View {
                     viewModel.addFlight(flight)
                 }
                 .toolbar {
-                    // Add flight icon if needed
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "airplane")
                             .foregroundStyle(.blue)
@@ -295,10 +294,10 @@ struct TripDetailsView: View {
         .alert("Delete Trip", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
-                let deleted = viewModel.deleteTrip()
-                if deleted {
-                    // Dismiss all the way back to root
-                    presentationMode.wrappedValue.dismiss()
+                Task {
+                    if await viewModel.deleteTrip() {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         } message: {

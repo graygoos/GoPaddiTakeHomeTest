@@ -7,47 +7,212 @@
 
 import Foundation
 
+// MARK: - API Response/Request Models
+struct APIResponse<T: Codable>: Codable {
+    let data: T
+    let success: Bool?
+    let message: String?
+    let error: String?
+}
+
+struct APIRequest<T: Encodable>: Encodable {
+    let data: T
+}
+
+// MARK: - API Errors
 enum APIError: Error {
     case invalidURL
     case invalidResponse
+    case decodingError(Error)
     case networkError(Error)
+    case serverError(String)
+    case clientError(String)
+    
+    var userMessage: String {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL configuration"
+        case .invalidResponse:
+            return "Server returned an invalid response"
+        case .decodingError(let error):
+            return "Data format error: \(error.localizedDescription)"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        case .serverError(let message):
+            return message
+        case .clientError(let message):
+            return message
+        }
+    }
 }
 
+// MARK: - API Service
 class APIService {
-    private let baseURL = "https://beeceptor.com/crud-api"
+    static let shared = APIService()
+    private let baseURL = "https://gopaddi.free.beeceptor.com/api"
     
-    func createTrip(_ trip: Trip) async throws -> Trip {
-        guard let url = URL(string: "\(baseURL)/trips") else {
+    private let jsonDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
+    
+    private let jsonEncoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        return encoder
+    }()
+    
+    private func makeRequest<T: Codable>(endpoint: String,
+                                       method: String,
+                                       body: Data? = nil) async throws -> T {
+        guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw APIError.invalidURL
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(trip)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.timeoutInterval = 30 // Add timeout
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.invalidResponse
+        if let body = body {
+            request.httpBody = body
         }
         
-        return try JSONDecoder().decode(Trip.self, from: data)
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            // Debug print
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("\(method) \(endpoint) Response: \(responseString)")
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw APIError.invalidResponse
+            }
+            
+            switch httpResponse.statusCode {
+            case 200...299:
+                do {
+                    // First try: Direct decoding of the data field
+                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let dataField = json["data"] {
+                        let dataData = try JSONSerialization.data(withJSONObject: dataField)
+                        return try jsonDecoder.decode(T.self, from: dataData)
+                    }
+                    
+                    // Second try: Direct decoding of the whole response
+                    return try jsonDecoder.decode(T.self, from: data)
+                    
+                } catch {
+                    print("Decoding error: \(error)")
+                    throw APIError.decodingError(error)
+                }
+                
+            case 400...499:
+                throw APIError.clientError("Invalid request: \(String(data: data, encoding: .utf8) ?? "")")
+            case 500...599:
+                throw APIError.serverError("Server error: Please try again later")
+            default:
+                throw APIError.invalidResponse
+            }
+        } catch let error as APIError {
+            throw error
+        } catch {
+            throw APIError.networkError(error)
+        }
     }
     
     func fetchTrips() async throws -> [Trip] {
-        guard let url = URL(string: "\(baseURL)/trips") else {
-            throw APIError.invalidURL
-        }
+        return try await makeRequest(endpoint: "trips", method: "GET")
+    }
+    
+    func createTrip(_ trip: Trip) async throws -> Trip {
+        let requestWrapper = APIRequest(data: trip)
+        let encodedData = try jsonEncoder.encode(requestWrapper)
+        return try await makeRequest(endpoint: "trips", method: "POST", body: encodedData)
+    }
+    
+    func updateTrip(_ trip: Trip) async throws -> Trip {
+        let requestWrapper = APIRequest(data: trip)
+        let encodedData = try jsonEncoder.encode(requestWrapper)
+        return try await makeRequest(endpoint: "trips/\(trip.id)", method: "PUT", body: encodedData)
+    }
+    
+    func deleteTrip(_ tripId: String) async throws {
+        _ = try await makeRequest(endpoint: "trips/\(tripId)", method: "DELETE") as EmptyResponse
+    }
+}
+
+// MARK: - Helper Types
+struct EmptyResponse: Codable {}
+
+// MARK: - Mock API Service
+class MockAPIService: APIService {
+    override func fetchTrips() async throws -> [Trip] {
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         
-        let (data, response) = try await URLSession.shared.data(from: url)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.invalidResponse
-        }
-        
-        return try JSONDecoder().decode([Trip].self, from: data)
+        return [
+            Trip(
+                id: "1",
+                name: "Dubai Adventure",
+                destination: "Dubai, UAE",
+                date: Date(),
+                endDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
+                details: "Luxury resort stay in Dubai with desert safari and city tours.",
+                price: 3850.00,
+                images: [],
+                location: Location(
+                    id: "2",
+                    name: "Dubai",
+                    country: "United Arab Emirates",
+                    flag: "🇦🇪",
+                    subtitle: "Dubai International"
+                ),
+                travelStyle: .couple,
+                flights: [],
+                hotels: [],
+                activities: []
+            ),
+            Trip(
+                id: "2",
+                name: "Paris Getaway",
+                destination: "Paris, France",
+                date: Date().addingTimeInterval(86400 * 30),
+                endDate: Date().addingTimeInterval(86400 * 37),
+                details: "Romantic week in the city of lights.",
+                price: 4200.00,
+                images: [],
+                location: Location(
+                    id: "3",
+                    name: "Paris",
+                    country: "France",
+                    flag: "🇫🇷",
+                    subtitle: "Charles de Gaulle"
+                ),
+                travelStyle: .couple,
+                flights: [],
+                hotels: [],
+                activities: []
+            )
+        ]
+    }
+    
+    override func createTrip(_ trip: Trip) async throws -> Trip {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        return trip
+    }
+    
+    override func updateTrip(_ trip: Trip) async throws -> Trip {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        return trip
+    }
+    
+    override func deleteTrip(_ tripId: String) async throws {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
     }
 }

@@ -24,7 +24,8 @@ struct Trip: Codable, Identifiable, Hashable {
     
     // Coding keys to ensure proper encoding/decoding
     private enum CodingKeys: String, CodingKey {
-        case id, name, destination, date, endDate, details, price, images, location, travelStyle, flights, hotels, activities
+        case id, name, destination, date, endDate, details, price,
+             images, location, travelStyle, flights, hotels, activities
     }
     
     func hash(into hasher: inout Hasher) {

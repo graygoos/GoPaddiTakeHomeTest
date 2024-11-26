@@ -16,9 +16,8 @@ struct TripPlanningView: View {
             ZStack(alignment: .top) {
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Header with hotel image and text overlay
+                        // Header with hotel image
                         ZStack(alignment: .top) {
-                            // Background image
                             GeometryReader { proxy in
                                 let minY = proxy.frame(in: .named("scroll")).minY
                                 let height = max(0, proxy.size.height + (minY > 0 ? minY : 0))
@@ -30,9 +29,8 @@ struct TripPlanningView: View {
                                     .offset(y: minY > 0 ? -minY : 0)
                                     .clipped()
                             }
-                            .frame(height: UIScreen.main.bounds.height * 0.75) // 75% of screen height
+                            .frame(height: UIScreen.main.bounds.height * 0.75)
                             
-                            // Header text
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("Plan Your Dream Trip in Minutes")
                                     .font(.title2)
@@ -52,7 +50,7 @@ struct TripPlanningView: View {
                                 .font(.title2)
                                 .fontWeight(.bold)
                             
-                            if viewModel.trips.isEmpty {
+                            if viewModel.trips.isEmpty && !viewModel.isLoading {
                                 Text("No trips planned yet")
                                     .foregroundColor(.secondary)
                                     .padding(.vertical)
@@ -70,7 +68,6 @@ struct TripPlanningView: View {
                 }
                 .coordinateSpace(name: "scroll")
                 
-                // Overlay trip planner
                 if viewModel.showingPlannerOverlay {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
@@ -82,11 +79,8 @@ struct TripPlanningView: View {
                     
                     GeometryReader { geometry in
                         VStack {
-                            let topPadding = geometry.safeAreaInsets.top + 44 // Navigation bar height
-                            let overlayPosition = (UIScreen.main.bounds.height * 0.42) // Position at 35% from top
-                            
                             Spacer()
-                                .frame(height: overlayPosition)
+                                .frame(height: UIScreen.main.bounds.height * 0.42)
                             
                             TripPlannerOverlay(viewModel: viewModel)
                                 .padding(.horizontal)
@@ -96,9 +90,22 @@ struct TripPlanningView: View {
                     }
                     .transition(.move(edge: .top))
                 }
+                
+                // Loading Overlay
+                if viewModel.isLoading {
+                    LoadingOverlay()
+                }
+                
+                // Error Banner
+                if viewModel.showError {
+                    ErrorBanner(message: viewModel.errorMessage ?? "An error occurred") {
+                        viewModel.showError = false
+                        viewModel.errorMessage = nil
+                    }
+                }
             }
             .task {
-                viewModel.fetchTrips() // Fetch trips when view appears
+                viewModel.fetchTrips()
             }
             .navigationTitle("Plan a Trip")
             .navigationBarTitleDisplayMode(.inline)

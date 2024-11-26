@@ -14,12 +14,10 @@ struct Location: Codable, Identifiable, Hashable {
     let flag: String
     let subtitle: String?
     
-    // Implement Hashable
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
-    // Implement Equatable
     static func == (lhs: Location, rhs: Location) -> Bool {
         lhs.id == rhs.id
     }
