@@ -19,9 +19,8 @@ struct HotelCard: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Image carousel
+            // Image carousel with overlay buttons
             ZStack {
-                // Image
                 if let imageName = hotelImages[safe: currentImageIndex] {
                     Image(imageName)
                         .resizable()
@@ -30,14 +29,18 @@ struct HotelCard: View {
                         .clipped()
                 }
                 
-                // Navigation arrows
+                // Navigation buttons overlay
                 HStack {
                     Button {
                         withAnimation {
                             currentImageIndex = (currentImageIndex - 1 + hotelImages.count) % hotelImages.count
                         }
                     } label: {
-                        CircleButton(icon: "chevron.left")
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
                     }
                     
                     Spacer()
@@ -47,27 +50,32 @@ struct HotelCard: View {
                             currentImageIndex = (currentImageIndex + 1) % hotelImages.count
                         }
                     } label: {
-                        CircleButton(icon: "chevron.right")
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
                     }
                 }
                 .padding(.horizontal, 16)
             }
             
-            // Hotel details
+            // Hotel details on white background
             VStack(alignment: .leading, spacing: 12) {
                 // Name and address
                 Text(hotel.name)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 Text(hotel.address)
-                    .font(.system(size: 14))
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .lineLimit(2)
                 
-                // Rating and amenities
+                // Rating and amenities row
                 HStack(spacing: 16) {
                     Button(action: {}) {
                         Label("Show in map", systemImage: "map")
-                            .font(.system(size: 14))
-                            .foregroundColor(.blue)
+                            .foregroundColor(.appBlue)
                     }
                     
                     HStack(spacing: 4) {
@@ -77,38 +85,45 @@ struct HotelCard: View {
                         Text("(\(hotel.reviews))")
                             .foregroundColor(.secondary)
                     }
-                    .font(.system(size: 14))
                     
                     HStack(spacing: 4) {
                         Image(systemName: "bed.double")
                         Text(hotel.roomType)
                     }
-                    .font(.system(size: 14))
                 }
+                .font(.system(size: 14))
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
                 
-                // Dates
-                HStack(spacing: 16) {
-                    Label {
-                        Text("In: \(hotel.checkIn.formatted(date: .numeric, time: .omitted))")
-                    } icon: {
+                // Check-in/out dates
+                HStack(spacing: 20) {
+                    HStack(spacing: 8) {
                         Image(systemName: "calendar")
+                        Text("In:")
+                        Text(hotel.checkIn.formatted(date: .numeric, time: .omitted))
                     }
                     
-                    Label {
-                        Text("Out: \(hotel.checkOut.formatted(date: .numeric, time: .omitted))")
-                    } icon: {
+                    HStack(spacing: 8) {
                         Image(systemName: "calendar")
+                        Text("Out:")
+                        Text(hotel.checkOut.formatted(date: .numeric, time: .omitted))
                     }
                 }
                 .font(.system(size: 14))
+                .foregroundColor(.secondary)
                 
-                // Action links and price
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
+                
+                // Action buttons
                 HStack {
                     ForEach(["Hotel details", "Price details", "Edit details"], id: \.self) { text in
                         Button(action: {}) {
                             Text(text)
-                                .font(.system(size: 14))
-                                .foregroundColor(.blue)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.appBlue)
                         }
                         if text != "Edit details" {
                             Spacer()
@@ -116,26 +131,30 @@ struct HotelCard: View {
                     }
                 }
                 
-                HStack {
-                    Spacer()
-                    Text("₦\(hotel.price, specifier: "%.2f")")
-                        .font(.system(size: 16, weight: .medium))
-                }
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
+                
+                // Price
+                Text("₦\(hotel.price, specifier: "%.2f")")
+                    .font(.system(size: 16, weight: .medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
             }
             .padding(16)
+            .background(Color.white)
             
             // Remove button
             Button {
                 showRemoveAlert = true
             } label: {
-                HStack {
+                HStack(spacing: 8) {
                     Text("Remove")
-                        .foregroundColor(.red)
                     Image(systemName: "xmark")
-                        .foregroundColor(.red)
                 }
+                .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 16)
                 .background(Color.red.opacity(0.1))
             }
         }
@@ -145,8 +164,7 @@ struct HotelCard: View {
             message: "Are you sure you want to remove this hotel?",
             onConfirm: onRemove
         ))
-        .background(Color(hex: "0D1139"))
-        .foregroundColor(.white)
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

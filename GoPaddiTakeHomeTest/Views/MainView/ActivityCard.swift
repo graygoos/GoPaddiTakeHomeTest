@@ -9,9 +9,10 @@ import SwiftUI
 
 struct ActivityCard: View {
     let activity: Activity
-    var onRemove: () -> Void
     @State private var currentImageIndex = 0
     @State private var showRemoveAlert = false
+    @State private var showChangeTime = false
+    var onRemove: () -> Void
     
     private var activityImages: [String] {
         ["activity-1", "activity-2", "activity-3", "activity-4"]
@@ -19,7 +20,7 @@ struct ActivityCard: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Image carousel
+            // Image carousel with overlay buttons
             ZStack {
                 if let imageName = activityImages[safe: currentImageIndex] {
                     Image(imageName)
@@ -29,14 +30,18 @@ struct ActivityCard: View {
                         .clipped()
                 }
                 
-                // Navigation arrows
+                // Navigation buttons overlay
                 HStack {
                     Button {
                         withAnimation {
                             currentImageIndex = (currentImageIndex - 1 + activityImages.count) % activityImages.count
                         }
                     } label: {
-                        CircleButton(icon: "chevron.left")
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
                     }
                     
                     Spacer()
@@ -46,20 +51,26 @@ struct ActivityCard: View {
                             currentImageIndex = (currentImageIndex + 1) % activityImages.count
                         }
                     } label: {
-                        CircleButton(icon: "chevron.right")
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
                     }
                 }
                 .padding(.horizontal, 16)
             }
             
-            // Activity details
+            // Activity details on white background
             VStack(alignment: .leading, spacing: 12) {
                 // Title and description
                 Text(activity.name)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 Text(activity.description)
-                    .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
                 
                 // Location, rating, and duration
                 HStack(spacing: 16) {
@@ -70,43 +81,53 @@ struct ActivityCard: View {
                             .foregroundColor(.yellow)
                         Text(String(format: "%.1f", activity.rating))
                         Text("(\(activity.reviews))")
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.secondary)
                     }
                     
                     Label(activity.duration, systemImage: "clock")
                 }
                 .font(.system(size: 14))
                 
-                // Time slot and day
-                HStack(spacing: 12) {
-                    Button("Change time") {
-                        // Handle time change
+                // Time slots
+                HStack(alignment: .top) {
+                    // Left side - Change time and actual time.
+                    VStack(alignment: .leading, spacing: 4) {
+                        Button {
+                            showChangeTime = true
+                        } label: {
+                            Text("Change time")
+                                .foregroundColor(.appBlue)
+                                .underline()
+                                .font(.system(size: 14))
+                        }
+                        
+                        Text(activity.timeSlot.formatted(.dateTime.hour().minute()) + " on " + activity.timeSlot.formatted(.dateTime.month().day()))
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
                     }
-                    .font(.system(size: 14))
-                    .foregroundColor(.white)
-                    .underline()
                     
-                    Text(activity.timeSlot.formatted(date: .omitted, time: .shortened))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(8)
+                    Spacer()
                     
+                    // Right side - Activity day
                     Text(activity.day)
+                        .font(.system(size: 14))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.2))
+                        .background(Color.gray.opacity(0.1))
                         .cornerRadius(8)
                 }
-                .font(.system(size: 14))
                 
-                // Action links and price
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
+                
+                // Action buttons
                 HStack {
                     ForEach(["Activity details", "Price details", "Edit details"], id: \.self) { text in
                         Button(action: {}) {
                             Text(text)
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.appBlue)
                         }
                         if text != "Edit details" {
                             Spacer()
@@ -114,39 +135,47 @@ struct ActivityCard: View {
                     }
                 }
                 
-                HStack {
-                    Spacer()
-                    Text("₦\(activity.price, specifier: "%.2f")")
-                        .font(.system(size: 16, weight: .semibold))
-                }
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
+                
+                // Price
+                Text("₦\(activity.price, specifier: "%.2f")")
+                    .font(.system(size: 16, weight: .medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
-            .background(Color.blue)
+            .background(Color.white)
             
             // Remove button
             Button {
                 showRemoveAlert = true
             } label: {
-                HStack {
+                HStack(spacing: 8) {
                     Text("Remove")
-                        .foregroundColor(.red)
                     Image(systemName: "xmark")
-                        .foregroundColor(.red)
                 }
+                .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 16)
                 .background(Color.red.opacity(0.1))
             }
         }
-        .background(Color.blue)
-        .foregroundColor(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .fullScreenCover(isPresented: $showChangeTime) {
+            NavigationStack {
+                AddActivityView { updatedActivity in
+                    // Handle time update
+                }
+            }
+        }
         .modifier(RemoveAlertModifier(
             showAlert: $showRemoveAlert,
             title: "Remove Activity",
             message: "Are you sure you want to remove this activity?",
             onConfirm: onRemove
         ))
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
