@@ -14,10 +14,17 @@ struct EmptyStateCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with icon and title
-            HStack(spacing: 8) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(type.titleColor)
+            HStack(spacing: 12) {
+                // Circular icon background
+                Circle()
+                    .fill(type.iconBackgroundColor)
+                    .frame(width: 32, height: 32)
+                    .overlay {
+                        Image(systemName: type.icon)
+                            .font(.system(size: 16))
+                            .foregroundColor(type.iconColor)
+                    }
+                
                 Text(type.title)
                     .font(.headline)
                     .foregroundColor(type.titleColor)
@@ -26,18 +33,20 @@ struct EmptyStateCard: View {
             .padding(.vertical, 12)
             
             // White content area
-            VStack(spacing: 16) {
+            VStack(spacing: 10) {
                 // Empty state illustration and text
                 VStack(spacing: 12) {
                     Image(type.illustrationName)
                         .resizable()
+                        .renderingMode(.template) // Enable template rendering for tinting
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 120, height: 120)
-                        .padding(.top, 24)
+                        .foregroundStyle(type.illustrationColor) // Apply tint color
+                        .padding(.top, 32)
                     
                     Text("No request yet")
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 24)
+                        .font(.system(size: 15, weight: .medium))
+                        .padding(.bottom, 32)
                 }
                 
                 // Add button
@@ -45,13 +54,14 @@ struct EmptyStateCard: View {
                     Text(type.buttonTitle)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.blue)
+                        .background(Color(hex: "0054E4"))
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                .padding(.bottom, 20)
             }
+            .frame(height: 280)
             .background(Color.white)
             .cornerRadius(12)
             .padding([.horizontal, .bottom], 16)
@@ -84,9 +94,9 @@ enum ItineraryType {
     
     var icon: String {
         switch self {
-        case .flights: return "airplane.departure"  // Updated to match design
-        case .hotels: return "building.2.fill"      // Updated to match design
-        case .activities: return "figure.hiking"     // Updated to match design
+        case .flights: return "airplane"
+        case .hotels: return "building.2"
+        case .activities: return "figure.hiking"
         }
     }
     
@@ -100,9 +110,9 @@ enum ItineraryType {
     
     var backgroundColor: Color {
         switch self {
-        case .flights: return Color(.systemGray6)  // Updated to match design
-        case .hotels: return Color(red: 0.06, green: 0.09, blue: 0.23)
-        case .activities: return .blue
+        case .flights: return Color(hex: "F0F2F5")
+        case .hotels: return Color(hex: "344054")
+        case .activities: return Color(hex: "0054E4")
         }
     }
     
@@ -118,6 +128,41 @@ enum ItineraryType {
         case .flights: return "flight-empty-state"
         case .hotels: return "hotel-empty-state"
         case .activities: return "activities-empty-state"
+        }
+    }
+
+    var iconBackgroundColor: Color {
+        switch self {
+        case .flights: return .white
+        case .hotels, .activities: return .white.opacity(0.1)
+        }
+    }
+    
+    var iconColor: Color {
+        switch self {
+        case .flights: return Color(hex: "0054E4")
+        case .hotels, .activities: return .white
+        }
+    }
+    
+    var buttonBackgroundColor: Color {
+        switch self {
+        case .flights, .hotels: return Color(hex: "0054E4")
+        case .activities: return .white
+        }
+    }
+    
+    var buttonTextColor: Color {
+        switch self {
+        case .flights, .hotels: return .white
+        case .activities: return Color(hex: "0054E4")
+        }
+    }
+    
+    var illustrationColor: Color {
+        switch self {
+        case .flights, .hotels, .activities:
+            return .appBlue
         }
     }
 }
