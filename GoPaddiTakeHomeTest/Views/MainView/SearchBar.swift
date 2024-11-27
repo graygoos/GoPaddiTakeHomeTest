@@ -17,6 +17,7 @@ struct SearchBar: View {
             
             TextField("Search...", text: $text)
                 .foregroundColor(.primary)
+                .font(.system(size: 18))
             
             if !text.isEmpty {
                 Button(action: {
@@ -27,9 +28,13 @@ struct SearchBar: View {
                 }
             }
         }
-        .padding(8)
+        .padding(15)
         .background(Color(.systemGray6))
         .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.blue, lineWidth: 2)
+        )
     }
 }
 
@@ -37,3 +42,4 @@ struct SearchBar: View {
     SearchBar(text: .constant("Search text"))
         .padding()
 }
+
