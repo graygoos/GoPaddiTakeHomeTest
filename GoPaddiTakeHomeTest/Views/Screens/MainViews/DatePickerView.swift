@@ -7,19 +7,28 @@
 
 import SwiftUI
 
-/// View for selecting start and end dates for a trip
+/// A view that displays a calendar interface for selecting trip start and end dates
+/// This view presents a scrollable calendar with a custom header and bottom date selection area
 struct DatePickerView: View {
-    /// Environment variable to dismiss the view
+    // MARK: - Properties
+    
+    /// Environment variable to handle view dismissal
     @Environment(\.dismiss) private var dismiss
-    /// Binding to hold the selected trip dates
+    
+    /// Binding to the selected trip dates, allows two-way data flow with parent view
     @Binding var tripDates: TripDate
-    /// Flag to determine if selecting end date or start date
+    
+    /// Flag indicating whether user is selecting end date (true) or start date (false)
     let isSelectingEndDate: Bool
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 0) {
-            // Navigation header with close button and title
+            // MARK: - Navigation Header
+            
             HStack {
+                // Dismiss button
                 Button {
                     dismiss()
                 } label: {
@@ -28,6 +37,7 @@ struct DatePickerView: View {
                         .padding()
                 }
                 
+                // Title
                 Text("Date")
                     .font(.headline)
                 
@@ -36,10 +46,11 @@ struct DatePickerView: View {
             .padding(.top, getSafeAreaTop())
             .background(Color(UIColor.systemBackground))
             
-            // Scrollable calendar months
+            // MARK: - Calendar Scroll View
+            
             ScrollView {
                 VStack(spacing: 32) {
-                    // Display 12 months starting from current date
+                    // Generate calendar months for the next year
                     ForEach(0..<12) { month in
                         CalendarMonth(
                             month: Calendar.current.date(
@@ -54,43 +65,65 @@ struct DatePickerView: View {
                 .padding()
             }
             
-            // Date selection summary and confirmation button
-            VStack(spacing: 16) {
-                // Start and end date display
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Start Date")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(tripDates.startDate?.formatted(date: .abbreviated, time: .omitted) ?? "Select date")
-                    }
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing) {
-                        Text("End Date")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(tripDates.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "Select date")
-                    }
-                }
+            // MARK: - Bottom Date Selection Area
+            
+            VStack(spacing: 0) {
+                // Visual separator between calendar and selection area
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
                 
-                // Confirmation button
-                Button("Choose Date") {
-                    dismiss()
+                VStack(spacing: 16) {
+                    // MARK: Date Selection Boxes
+                    
+                    HStack(spacing: 12) {
+                        // Start date selection box
+                        VStack(spacing: 4) {
+                            Text("Start Date")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(tripDates.startDate?.formatted(date: .abbreviated, time: .omitted) ?? "Select date")
+                                .font(.subheadline)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity) // Ensures equal width with end date box
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(8)
+                        
+                        // End date selection box
+                        VStack(spacing: 4) {
+                            Text("End Date")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(tripDates.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "Select date")
+                                .font(.subheadline)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity) // Ensures equal width with start date box
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(8)
+                    }
+                    
+                    // MARK: - Confirmation Button
+                    
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("Choose Date")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                    }
                 }
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(12)
+                .padding(16)
+                .background(Color(UIColor.systemBackground))
             }
-            .padding()
-            .background(Color(UIColor.systemBackground))
         }
         .background(Color(UIColor.systemBackground))
-        .ignoresSafeArea()
+        .ignoresSafeArea() // Extends view to edges of screen
     }
 }
 
