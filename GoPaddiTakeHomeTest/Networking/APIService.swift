@@ -49,7 +49,7 @@ enum APIError: Error {
 // MARK: - API Service
 class APIService {
     static let shared = APIService()
-    private let baseURL = "https://gopaddi.free.beeceptor.com/api"
+    private let baseURL = "https://gopaddi1.free.beeceptor.com/api"
     
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()

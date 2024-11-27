@@ -2,7 +2,7 @@
 //  ErrorBanner.swift
 //  GoPaddiTakeHomeTest
 //
-//  Created by Femi Aliu on 26/11/2024.
+//  Created by Femi Aliu
 //
 
 import SwiftUI
@@ -34,6 +34,13 @@ struct ErrorBanner: View {
     }
 }
 
-//#Preview {
-//    ErrorBanner()
-//}
+#Preview {
+    ErrorBanner(
+        message: "An unexpected error occurred.",
+        onDismiss: {
+            print("Dismiss tapped.")
+        }
+    )
+    .padding()
+}
+

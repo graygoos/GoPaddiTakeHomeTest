@@ -2,7 +2,7 @@
 //  LoadingOverlay.swift
 //  GoPaddiTakeHomeTest
 //
-//  Created by Femi Aliu on 26/11/2024.
+//  Created by Femi Aliu
 //
 
 import SwiftUI
