@@ -106,6 +106,9 @@ class LocationSearchService: ObservableObject {
        self.geocoder = geocoder
        self.cache = NSCache<NSString, NSArray>()
        self.cache.countLimit = Constants.cacheLimit
+       
+       // Show all locations by default
+       self.searchResults = Location.mockLocations
    }
    
    // MARK: - Public Methods

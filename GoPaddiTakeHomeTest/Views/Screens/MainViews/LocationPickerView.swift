@@ -7,34 +7,38 @@
 
 import SwiftUI
 
-/// A view that allows users to search and select a location from a list of available destinations
+/// A view that allows users to search and select from a list of locations
+/// Displays locations with their country flags and relevant details
 struct LocationPickerView: View {
     // MARK: - Properties
     
-    /// Reference to the dismiss action from the environment
+    /// Environment variable to handle view dismissal
     @Environment(\.dismiss) private var dismiss
     
-    /// Binding to the selected location that will be passed back to the parent view
+    /// Binding to the selected location that will be updated when user makes a selection
     @Binding var selectedLocation: Location?
     
-    /// Tracks the current search text input
+    /// State variable to store the current search text
     @State private var searchText = ""
     
-    /// View model handling location search functionality and results
+    /// StateObject to manage location search functionality and results
     @StateObject private var locationSearch = LocationSearchService()
     
     // MARK: - Body
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header section with dismiss button and title
+            // MARK: - Header Section
+            
             HStack {
+                // Dismiss button
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
                         .foregroundColor(.primary)
                         .padding()
                 }
                 
+                // Title
                 Text("Select Location")
                     .font(.headline)
                 
@@ -43,29 +47,43 @@ struct LocationPickerView: View {
             .padding(.top, getSafeAreaTop())
             .background(Color(UIColor.systemBackground))
             
-            // Search input with live filtering
-            SearchBar(text: $searchText)
-                .padding()
-                .onChange(of: searchText) { _, newValue in
-                    locationSearch.searchLocation(newValue)
-                }
+            // MARK: - Search Section
             
-            // Content area showing loading, error, or results
+            // Search bar with automatic location display on focus
+            SearchBar(text: $searchText) {
+                // Show all locations when search bar is focused
+                locationSearch.searchLocation("")
+            }
+            .padding()
+            .onChange(of: searchText) { _, newValue in
+                // Filter locations based on search text
+                locationSearch.searchLocation(newValue)
+            }
+            
+            // MARK: - Content Section
+            
+            // Show loading indicator while fetching results
             if locationSearch.isLoading {
                 ProgressView()
                     .padding()
-            } else if let error = locationSearch.error {
+            }
+            // Show error message if search fails
+            else if let error = locationSearch.error {
                 Text(error.userMessage)
                     .foregroundColor(.red)
                     .padding()
-            } else {
-                // Results list with selectable locations
-                List(locationSearch.searchResults) { location in
-                    Button(action: {
-                        selectedLocation = location
-                        dismiss()
-                    }) {
-                        LocationRowView(location: location)
+            }
+            // Show location results
+            else {
+                List {
+                    ForEach(locationSearch.searchResults) { location in
+                        Button(action: {
+                            // Update selected location and dismiss view when user makes a selection
+                            selectedLocation = location
+                            dismiss()
+                        }) {
+                            LocationRowView(location: location)
+                        }
                     }
                 }
                 .listStyle(.plain)
