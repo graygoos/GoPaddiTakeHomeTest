@@ -15,74 +15,79 @@ struct LocationPickerView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // ... header code ...
-            
-            // Search bar with loading indicator
+            // Custom Header
             HStack {
-                TextField("Please select a city", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .padding()
-                
-                if locationSearch.isLoading {
-                    ProgressView()
-                        .padding(.trailing)
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.primary)
+                        .padding()
                 }
+                
+                Text("Select Location")
+                    .font(.headline)
+                
+                Spacer()
             }
+            .padding(.top, getSafeAreaTop())
             .background(Color(UIColor.systemBackground))
             
-            if let error = locationSearch.error {
+            // Search bar
+            SearchBar(text: $searchText)
+                .padding()
+                .onChange(of: searchText) { _, newValue in
+                    locationSearch.searchLocation(newValue)
+                }
+            
+            if locationSearch.isLoading {
+                ProgressView()
+                    .padding()
+            } else if let error = locationSearch.error {
                 Text(error.userMessage)
                     .foregroundColor(.red)
                     .padding()
-            }
-            
-            List {
-                ForEach(locationSearch.searchResults) { location in
-                    LocationRowView(location: location) {
+            } else {
+                List(locationSearch.searchResults) { location in
+                    Button(action: {
                         selectedLocation = location
                         dismiss()
+                    }) {
+                        LocationRowView(location: location)
                     }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
-        }
-        .onChange(of: searchText) { _, newValue in
-            locationSearch.searchLocation(newValue)
         }
     }
 }
 
-// Extracted row view for better organization
 struct LocationRowView: View {
     let location: Location
-    let onSelect: () -> Void
     
     var body: some View {
-        Button(action: onSelect) {
-            HStack(spacing: 12) {
-                Image("location-icon")
-                    .resizable()
-                    .renderingMode(.template)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(.gray)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(location.name + ", " + location.country)
-                        .foregroundColor(.primary)
-                    if let subtitle = location.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
+        HStack(spacing: 12) {
+            // Location icon with corresponding image from assets
+            Image(location.name)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 50, height: 50)
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(location.name), \(location.country)")
+                    .foregroundColor(.primary)
+                if let subtitle = location.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                
-                Spacer()
-                
-                Text(location.flag)
-                    .font(.title2)
             }
+            
+            Spacer()
+            
+            Text(location.flag)
+                .font(.title2)
         }
+        .padding(.vertical, 8)
     }
 }
 

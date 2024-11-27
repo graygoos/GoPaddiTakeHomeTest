@@ -12,37 +12,20 @@ class TripDetailsViewModel: ObservableObject {
     @Published var flights: [Flight] = []
     @Published var hotels: [Hotel] = []
     @Published var activities: [Activity] = []
-    
-    // API-related states
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showError = false
     
     private let tripStore = TripStore.shared
-    private let apiService: APIService
+    private let apiService: APIServiceProtocol
     private var updateTask: Task<Void, Never>?
     
-    init(trip: Trip, apiService: APIService = APIService.shared) {
+    init(trip: Trip, apiService: APIServiceProtocol = APIService.shared) {
         self.trip = trip
         self.apiService = apiService
         self.flights = trip.flights ?? []
         self.hotels = trip.hotels ?? []
         self.activities = trip.activities ?? []
-    }
-    
-    private func updateTripInAPI() {
-        // Cancel any pending update
-        updateTask?.cancel()
-        
-        // Create new update task
-        updateTask = Task {
-            // Add slight delay to debounce rapid updates
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-            
-            if Task.isCancelled { return }
-            
-            await updateTripWithAPI()
-        }
     }
     
     @MainActor
@@ -52,41 +35,44 @@ class TripDetailsViewModel: ObservableObject {
         isLoading = true
         
         do {
-            let updatedTrip = try await apiService.updateTrip(trip)
-            tripStore.updateTrip(updatedTrip)
-            self.trip = updatedTrip
+            // Create updated trip with current collections
+            var updatedTrip = trip
+            updatedTrip.flights = flights
+            updatedTrip.hotels = hotels
+            updatedTrip.activities = activities
             
-            // Update local store even if API fails
-            tripStore.updateTrip(trip)
+            // Send to API
+            let apiUpdatedTrip = try await apiService.updateTrip(updatedTrip)
+            
+            // Update local state
+            self.trip = apiUpdatedTrip
+            self.flights = apiUpdatedTrip.flights ?? []
+            self.hotels = apiUpdatedTrip.hotels ?? []
+            self.activities = apiUpdatedTrip.activities ?? []
+            
+            // Update local store
+            tripStore.updateTrip(apiUpdatedTrip)
+            
         } catch let error as APIError {
             errorMessage = error.userMessage
             showError = true
-            
-            // Log error for debugging
-            print("Update trip error: \(error.userMessage)")
         } catch {
-            errorMessage = "An unexpected error occurred"
+            errorMessage = "Failed to update trip"
             showError = true
-            
-            // Log error for debugging
-            print("Unexpected error: \(error.localizedDescription)")
         }
         
         isLoading = false
     }
     
     func updateTripWithCurrentState() {
-        var updatedTrip = trip
-        updatedTrip.flights = flights
-        updatedTrip.hotels = hotels
-        updatedTrip.activities = activities
-        trip = updatedTrip
+        // Cancel any pending update
+        updateTask?.cancel()
         
-        // Update local store immediately
-        tripStore.updateTrip(trip)
-        
-        // Trigger API update
-        updateTripInAPI()
+        // Create new update task with debounce
+        updateTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
+            await updateTripWithAPI()
+        }
     }
     
     @MainActor
@@ -98,19 +84,15 @@ class TripDetailsViewModel: ObservableObject {
             tripStore.deleteTrip(trip.id)
             isLoading = false
             return true
-        } catch let error as APIError {
-            errorMessage = error.userMessage
-            showError = true
-            isLoading = false
-            return false
         } catch {
-            errorMessage = "An unexpected error occurred"
+            errorMessage = error.localizedDescription
             showError = true
             isLoading = false
             return false
         }
     }
     
+    // MARK: - Collection Management
     func addFlight(_ flight: Flight) {
         flights.append(flight)
         updateTripWithCurrentState()

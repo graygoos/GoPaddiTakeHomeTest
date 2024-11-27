@@ -25,32 +25,56 @@ class TripPlanningViewModel: ObservableObject {
     @Published var showError = false
     
     private let tripStore = TripStore.shared
-    private let apiService = APIService.shared
-    
-    var currentTripName: String = ""
-    var currentTripStyle: TravelStyle = .solo
-    var currentTripDescription: String = ""
+    private let apiService: APIServiceProtocol
     
     var canCreateTrip: Bool {
         selectedLocation != nil && tripDates.startDate != nil && tripDates.endDate != nil
     }
     
+    init(apiService: APIServiceProtocol = APIService.shared) {
+        self.apiService = apiService
+    }
+
+    @MainActor
+    func fetchTrips() async {
+        do {
+            isLoading = true
+            let fetchedTrips = try await apiService.fetchTrips()
+            trips = fetchedTrips
+            tripStore.trips = fetchedTrips
+            tripStore.saveTrips()
+        } catch let error as APIError {
+            errorMessage = error.userMessage
+            showError = true
+        } catch {
+            errorMessage = "Failed to fetch trips"
+            showError = true
+        }
+        isLoading = false
+    }
+    
     @MainActor
     func createDetailedTrip(name: String, travelStyle: TravelStyle, description: String) {
+        guard let location = selectedLocation,
+              let startDate = tripDates.startDate,
+              let endDate = tripDates.endDate else {
+            return
+        }
+        
         Task {
-            isLoading = true
-            
             do {
+                isLoading = true
+                
                 let newTrip = Trip(
                     id: UUID().uuidString,
                     name: name,
-                    destination: "\(selectedLocation?.name ?? ""), \(selectedLocation?.country ?? "")",
-                    date: tripDates.startDate ?? Date(),
-                    endDate: tripDates.endDate,
+                    destination: "\(location.name), \(location.country)",
+                    date: startDate,
+                    endDate: endDate,
                     details: description,
                     price: 0.0,
                     images: [],
-                    location: selectedLocation,
+                    location: location,
                     travelStyle: travelStyle,
                     flights: [],
                     hotels: [],
@@ -59,11 +83,11 @@ class TripPlanningViewModel: ObservableObject {
                 
                 let createdTrip = try await apiService.createTrip(newTrip)
                 trips.insert(createdTrip, at: 0)
-                tripStore.trips = trips
-                tripStore.saveTrips()
+                tripStore.updateTrip(createdTrip)
                 newlyCreatedTrip = createdTrip
                 showTripDetail = true
                 resetFormData()
+                
             } catch let error as APIError {
                 errorMessage = error.userMessage
                 showError = true
@@ -76,29 +100,10 @@ class TripPlanningViewModel: ObservableObject {
         }
     }
     
-    @MainActor
-    func fetchTrips() {
-        Task {
-            do {
-                isLoading = true
-                let trips = try await apiService.fetchTrips()
-                self.trips = trips
-            } catch let error as APIError {
-                errorMessage = error.userMessage
-                showError = true
-            } catch {
-                errorMessage = "Network error: The data couldn't be read because it isn't in the correct format."
-                showError = true
-            }
-            isLoading = false
-        }
-    }
-    
     private func resetFormData() {
         selectedLocation = nil
         tripDates = TripDate()
-        currentTripName = ""
-        currentTripStyle = .solo
-        currentTripDescription = ""
+        showCreateTrip = false
+        showingPlannerOverlay = false
     }
 }

@@ -46,8 +46,25 @@ enum APIError: Error {
     }
 }
 
+// MARK: - API Endpoints
+enum APIEndpoint {
+    static let trips = "trips"
+    
+    static func trip(_ id: String) -> String {
+        return "trips/\(id)"
+    }
+}
+
+// MARK: - API Service Protocol
+protocol APIServiceProtocol {
+    func fetchTrips() async throws -> [Trip]
+    func createTrip(_ trip: Trip) async throws -> Trip
+    func updateTrip(_ trip: Trip) async throws -> Trip
+    func deleteTrip(_ tripId: String) async throws
+}
+
 // MARK: - API Service
-class APIService {
+class APIService: APIServiceProtocol {
     static let shared = APIService()
     private let baseURL = "https://gopaddi1.free.beeceptor.com/api"
     
@@ -76,7 +93,7 @@ class APIService {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.timeoutInterval = 30 // Add timeout
+        request.timeoutInterval = 30
         
         if let body = body {
             request.httpBody = body
@@ -85,10 +102,11 @@ class APIService {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
-            // Debug print
+            #if DEBUG
             if let responseString = String(data: data, encoding: .utf8) {
                 print("\(method) \(endpoint) Response: \(responseString)")
             }
+            #endif
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.invalidResponse
@@ -96,15 +114,18 @@ class APIService {
             
             switch httpResponse.statusCode {
             case 200...299:
+                // Handle empty response for DELETE
+                if method == "DELETE" {
+                    return EmptyResponse() as! T
+                }
+                
                 do {
-                    // First try: Direct decoding of the data field
-                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let dataField = json["data"] {
-                        let dataData = try JSONSerialization.data(withJSONObject: dataField)
-                        return try jsonDecoder.decode(T.self, from: dataData)
+                    // Try parsing as APIResponse first
+                    if let apiResponse = try? jsonDecoder.decode(APIResponse<T>.self, from: data) {
+                        return apiResponse.data
                     }
                     
-                    // Second try: Direct decoding of the whole response
+                    // Fallback to direct decoding
                     return try jsonDecoder.decode(T.self, from: data)
                     
                 } catch {
@@ -113,14 +134,12 @@ class APIService {
                 }
                 
             case 400...499:
-                throw APIError.clientError("Invalid request: \(String(data: data, encoding: .utf8) ?? "")")
+                throw APIError.clientError("Request failed: \(String(data: data, encoding: .utf8) ?? "")")
             case 500...599:
-                throw APIError.serverError("Server error: Please try again later")
+                throw APIError.serverError("Server error")
             default:
                 throw APIError.invalidResponse
             }
-        } catch let error as APIError {
-            throw error
         } catch {
             throw APIError.networkError(error)
         }
@@ -131,14 +150,12 @@ class APIService {
     }
     
     func createTrip(_ trip: Trip) async throws -> Trip {
-        let requestWrapper = APIRequest(data: trip)
-        let encodedData = try jsonEncoder.encode(requestWrapper)
+        let encodedData = try jsonEncoder.encode(trip)
         return try await makeRequest(endpoint: "trips", method: "POST", body: encodedData)
     }
     
     func updateTrip(_ trip: Trip) async throws -> Trip {
-        let requestWrapper = APIRequest(data: trip)
-        let encodedData = try jsonEncoder.encode(requestWrapper)
+        let encodedData = try jsonEncoder.encode(trip)
         return try await makeRequest(endpoint: "trips/\(trip.id)", method: "PUT", body: encodedData)
     }
     

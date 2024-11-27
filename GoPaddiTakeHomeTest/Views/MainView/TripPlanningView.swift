@@ -105,7 +105,7 @@ struct TripPlanningView: View {
                 }
             }
             .task {
-                viewModel.fetchTrips()
+                await viewModel.fetchTrips()
             }
             .navigationTitle("Plan a Trip")
             .navigationBarTitleDisplayMode(.inline)
