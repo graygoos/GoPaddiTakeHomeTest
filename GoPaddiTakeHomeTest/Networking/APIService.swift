@@ -66,7 +66,7 @@ protocol APIServiceProtocol {
 // MARK: - API Service
 class APIService: APIServiceProtocol {
     static let shared = APIService()
-    private let baseURL = "https://gopaddi1.free.beeceptor.com/api"
+    private let baseURL = "https://gopaddi2.free.beeceptor.com/api"
     
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -119,15 +119,40 @@ class APIService: APIServiceProtocol {
                     return EmptyResponse() as! T
                 }
                 
+                // For POST requests (creating trips), return the original request data
+                // This is a workaround for the mock API returning placeholder values
+                if method == "POST", let body = body, T.self == Trip.self {
+                    do {
+                        let originalTrip = try jsonDecoder.decode(Trip.self, from: body)
+                        // Create new Trip instance with generated ID
+                        let newTrip = Trip(
+                            id: UUID().uuidString,
+                            name: originalTrip.name,
+                            destination: originalTrip.destination,
+                            date: originalTrip.date,
+                            endDate: originalTrip.endDate,
+                            details: originalTrip.details,
+                            price: originalTrip.price,
+                            images: originalTrip.images,
+                            location: originalTrip.location,
+                            travelStyle: originalTrip.travelStyle,
+                            flights: originalTrip.flights,
+                            hotels: originalTrip.hotels,
+                            activities: originalTrip.activities
+                        )
+                        return newTrip as! T
+                    } catch {
+                        print("Error decoding POST body: \(error)")
+                        throw APIError.decodingError(error)
+                    }
+                }
+                
+                // For other requests, try normal decoding
                 do {
-                    // Try parsing as APIResponse first
                     if let apiResponse = try? jsonDecoder.decode(APIResponse<T>.self, from: data) {
                         return apiResponse.data
                     }
-                    
-                    // Fallback to direct decoding
                     return try jsonDecoder.decode(T.self, from: data)
-                    
                 } catch {
                     print("Decoding error: \(error)")
                     throw APIError.decodingError(error)

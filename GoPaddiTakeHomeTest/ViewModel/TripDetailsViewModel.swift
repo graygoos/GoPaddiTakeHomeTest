@@ -41,38 +41,23 @@ class TripDetailsViewModel: ObservableObject {
             updatedTrip.hotels = hotels
             updatedTrip.activities = activities
             
-            // Send to API
+            // Try to update via API
             let apiUpdatedTrip = try await apiService.updateTrip(updatedTrip)
-            
-            // Update local state
             self.trip = apiUpdatedTrip
-            self.flights = apiUpdatedTrip.flights ?? []
-            self.hotels = apiUpdatedTrip.hotels ?? []
-            self.activities = apiUpdatedTrip.activities ?? []
-            
-            // Update local store
             tripStore.updateTrip(apiUpdatedTrip)
-            
-        } catch let error as APIError {
-            errorMessage = error.userMessage
-            showError = true
         } catch {
-            errorMessage = "Failed to update trip"
+            // On API failure, update local storage only
+            var updatedTrip = trip
+            updatedTrip.flights = flights
+            updatedTrip.hotels = hotels
+            updatedTrip.activities = activities
+            tripStore.updateTrip(updatedTrip)
+            
+            errorMessage = "Changes saved locally only due to API error"
             showError = true
         }
         
         isLoading = false
-    }
-    
-    func updateTripWithCurrentState() {
-        // Cancel any pending update
-        updateTask?.cancel()
-        
-        // Create new update task with debounce
-        updateTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
-            await updateTripWithAPI()
-        }
     }
     
     @MainActor
@@ -85,10 +70,23 @@ class TripDetailsViewModel: ObservableObject {
             isLoading = false
             return true
         } catch {
-            errorMessage = error.localizedDescription
+            // On API failure, still delete locally
+            tripStore.deleteTrip(trip.id)
+            errorMessage = "Trip deleted locally only due to API error"
             showError = true
             isLoading = false
-            return false
+            return true // Still return true to dismiss the view
+        }
+    }
+    
+    func updateTripWithCurrentState() {
+        // Cancel any pending update
+        updateTask?.cancel()
+        
+        // Create new update task with debounce
+        updateTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
+            await updateTripWithAPI()
         }
     }
     

@@ -33,6 +33,8 @@ class TripPlanningViewModel: ObservableObject {
     
     init(apiService: APIServiceProtocol = APIService.shared) {
         self.apiService = apiService
+        // Load stored trips immediately
+        self.trips = tripStore.trips
     }
 
     @MainActor
@@ -40,17 +42,24 @@ class TripPlanningViewModel: ObservableObject {
         do {
             isLoading = true
             let fetchedTrips = try await apiService.fetchTrips()
-            trips = fetchedTrips
-            tripStore.trips = fetchedTrips
-            tripStore.saveTrips()
-        } catch let error as APIError {
-            errorMessage = error.userMessage
-            showError = true
+            
+            // Merge API trips with local trips, avoiding duplicates
+            var allTrips = tripStore.trips
+            for apiTrip in fetchedTrips {
+                if !allTrips.contains(where: { $0.id == apiTrip.id }) {
+                    allTrips.append(apiTrip)
+                }
+            }
+            
+            trips = allTrips.sorted(by: { $0.date > $1.date })
+            isLoading = false
         } catch {
-            errorMessage = "Failed to fetch trips"
+            errorMessage = "Failed to fetch remote trips. Showing local trips only."
             showError = true
+            isLoading = false
+            // Use local trips if API fails
+            trips = tripStore.trips
         }
-        isLoading = false
     }
     
     @MainActor
@@ -62,40 +71,41 @@ class TripPlanningViewModel: ObservableObject {
         }
         
         Task {
+            isLoading = true
+            
+            let newTrip = Trip(
+                id: UUID().uuidString,
+                name: name,
+                destination: "\(location.name), \(location.country)",
+                date: startDate,
+                endDate: endDate,
+                details: description,
+                price: 0.0,
+                images: [],
+                location: location,
+                travelStyle: travelStyle,
+                flights: [],
+                hotels: [],
+                activities: []
+            )
+            
             do {
-                isLoading = true
-                
-                let newTrip = Trip(
-                    id: UUID().uuidString,
-                    name: name,
-                    destination: "\(location.name), \(location.country)",
-                    date: startDate,
-                    endDate: endDate,
-                    details: description,
-                    price: 0.0,
-                    images: [],
-                    location: location,
-                    travelStyle: travelStyle,
-                    flights: [],
-                    hotels: [],
-                    activities: []
-                )
-                
                 let createdTrip = try await apiService.createTrip(newTrip)
+                // Update both local arrays
                 trips.insert(createdTrip, at: 0)
                 tripStore.updateTrip(createdTrip)
                 newlyCreatedTrip = createdTrip
-                showTripDetail = true
-                resetFormData()
-                
-            } catch let error as APIError {
-                errorMessage = error.userMessage
-                showError = true
             } catch {
-                errorMessage = "An unexpected error occurred"
+                // If API fails, use the local trip
+                trips.insert(newTrip, at: 0)
+                tripStore.updateTrip(newTrip)
+                newlyCreatedTrip = newTrip
+                errorMessage = "Trip saved locally only. Network error occurred."
                 showError = true
             }
             
+            showTripDetail = true
+            resetFormData()
             isLoading = false
         }
     }

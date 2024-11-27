@@ -26,14 +26,17 @@ class TripStore: ObservableObject {
     func saveTrips() {
         if let encoded = try? JSONEncoder().encode(trips) {
             UserDefaults.standard.set(encoded, forKey: tripsKey)
+            UserDefaults.standard.synchronize()
         }
     }
     
     func updateTrip(_ updatedTrip: Trip) {
         if let index = trips.firstIndex(where: { $0.id == updatedTrip.id }) {
             trips[index] = updatedTrip
-            saveTrips()
+        } else {
+            trips.insert(updatedTrip, at: 0)
         }
+        saveTrips()
     }
     
     func deleteTrip(_ tripId: String) {
