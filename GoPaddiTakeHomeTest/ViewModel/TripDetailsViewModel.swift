@@ -34,23 +34,22 @@ class TripDetailsViewModel: ObservableObject {
         
         isLoading = true
         
+        // Create updated trip with current collections
+        var updatedTrip = trip
+        updatedTrip.flights = flights
+        updatedTrip.hotels = hotels
+        updatedTrip.activities = activities
+        
         do {
-            // Create updated trip with current collections
-            var updatedTrip = trip
-            updatedTrip.flights = flights
-            updatedTrip.hotels = hotels
-            updatedTrip.activities = activities
+            // Try API update but ignore its response data
+            _ = try await apiService.updateTrip(updatedTrip)
             
-            // Try to update via API
-            let apiUpdatedTrip = try await apiService.updateTrip(updatedTrip)
-            self.trip = apiUpdatedTrip
-            tripStore.updateTrip(apiUpdatedTrip)
+            // Use our local updated trip data instead
+            self.trip = updatedTrip
+            tripStore.updateTrip(updatedTrip)
         } catch {
             // On API failure, update local storage only
-            var updatedTrip = trip
-            updatedTrip.flights = flights
-            updatedTrip.hotels = hotels
-            updatedTrip.activities = activities
+            self.trip = updatedTrip
             tripStore.updateTrip(updatedTrip)
             
             errorMessage = "Changes saved locally only due to API error"
@@ -58,6 +57,53 @@ class TripDetailsViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    func addFlight(_ flight: Flight) {
+        flights.append(flight)
+        let updatedTrip = trip
+        tripStore.updateTrip(updatedTrip)
+        updateTripWithCurrentState()
+    }
+    
+    func addHotel(_ hotel: Hotel) {
+        hotels.append(hotel)
+        let updatedTrip = trip
+        tripStore.updateTrip(updatedTrip)
+        updateTripWithCurrentState()
+    }
+    
+    func addActivity(_ activity: Activity) {
+        activities.append(activity)
+        let updatedTrip = trip
+        tripStore.updateTrip(updatedTrip)
+        updateTripWithCurrentState()
+    }
+    
+    func removeFlight(at indexSet: IndexSet) {
+        flights.remove(atOffsets: indexSet)
+        updateTripWithCurrentState()
+    }
+    
+    func removeHotel(at indexSet: IndexSet) {
+        hotels.remove(atOffsets: indexSet)
+        updateTripWithCurrentState()
+    }
+    
+    func removeActivity(at indexSet: IndexSet) {
+        activities.remove(atOffsets: indexSet)
+        updateTripWithCurrentState()
+    }
+    
+    func updateTripWithCurrentState() {
+        // Cancel any pending update
+        updateTask?.cancel()
+        
+        // Create new update task with debounce
+        updateTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
+            await updateTripWithAPI()
+        }
     }
     
     @MainActor
@@ -77,47 +123,5 @@ class TripDetailsViewModel: ObservableObject {
             isLoading = false
             return true // Still return true to dismiss the view
         }
-    }
-    
-    func updateTripWithCurrentState() {
-        // Cancel any pending update
-        updateTask?.cancel()
-        
-        // Create new update task with debounce
-        updateTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
-            await updateTripWithAPI()
-        }
-    }
-    
-    // MARK: - Collection Management
-    func addFlight(_ flight: Flight) {
-        flights.append(flight)
-        updateTripWithCurrentState()
-    }
-    
-    func addHotel(_ hotel: Hotel) {
-        hotels.append(hotel)
-        updateTripWithCurrentState()
-    }
-    
-    func addActivity(_ activity: Activity) {
-        activities.append(activity)
-        updateTripWithCurrentState()
-    }
-    
-    func removeFlight(at indexSet: IndexSet) {
-        flights.remove(atOffsets: indexSet)
-        updateTripWithCurrentState()
-    }
-    
-    func removeHotel(at indexSet: IndexSet) {
-        hotels.remove(atOffsets: indexSet)
-        updateTripWithCurrentState()
-    }
-    
-    func removeActivity(at indexSet: IndexSet) {
-        activities.remove(atOffsets: indexSet)
-        updateTripWithCurrentState()
     }
 }

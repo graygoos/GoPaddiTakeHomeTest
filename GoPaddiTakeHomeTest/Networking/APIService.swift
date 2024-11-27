@@ -66,7 +66,7 @@ protocol APIServiceProtocol {
 // MARK: - API Service
 class APIService: APIServiceProtocol {
     static let shared = APIService()
-    private let baseURL = "https://gopaddi2.free.beeceptor.com/api"
+    private let baseURL = "https://gopaddi3.free.beeceptor.com/api"
     
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
