@@ -25,7 +25,7 @@ struct SplashScreen: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 200, height: 200)
-                        .colorInvert() // Makes the image white
+                        .colorInvert()
                 }
                 .scaleEffect(size)
                 .opacity(opacity)
