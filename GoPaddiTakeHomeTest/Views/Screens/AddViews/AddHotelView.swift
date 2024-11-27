@@ -7,28 +7,40 @@
 
 import SwiftUI
 
+// MARK: - AddHotelView
+/// A view that presents a form for adding a new hotel booking to the travel itinerary.
+/// Uses MVVM pattern with `AddHotelViewModel` to manage the form state.
 struct AddHotelView: View {
+    /// Environment variable to dismiss the view
     @Environment(\.dismiss) private var dismiss
+    
+    /// View model that manages the form state and business logic
     @StateObject private var viewModel = AddHotelViewModel()
+    
+    /// Closure called when a new hotel booking is successfully created
+    /// - Parameter hotel: The newly created Hotel instance
     let onAdd: (Hotel) -> Void
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Search Bar
+                // Search bar for filtering hotels (if applicable)
                 SearchBar(text: $viewModel.searchText)
                     .padding()
                     .background(Color(UIColor.systemBackground))
                 
-                // Hotel Form
+                // Main form containing hotel details
                 Form {
+                    // Basic hotel information section
                     Section("Hotel Details") {
                         TextField("Hotel Name", text: $viewModel.name)
                         TextField("Address", text: $viewModel.address)
                         TextField("Room Type", text: $viewModel.roomType)
                     }
                     
+                    // Rating and reviews section
                     Section("Rating") {
+                        // Interactive star rating system (1-5 stars)
                         HStack {
                             Text("Rating")
                             Spacer()
@@ -44,11 +56,13 @@ struct AddHotelView: View {
                             .keyboardType(.numberPad)
                     }
                     
+                    // Booking dates section
                     Section("Dates") {
                         DatePicker("Check-in", selection: $viewModel.checkIn, displayedComponents: .date)
                         DatePicker("Check-out", selection: $viewModel.checkOut, displayedComponents: .date)
                     }
                     
+                    // Pricing section (in Nigerian Naira)
                     Section("Price") {
                         TextField("Price", value: $viewModel.price, format: .currency(code: "NGN"))
                             .keyboardType(.decimalPad)
@@ -58,12 +72,14 @@ struct AddHotelView: View {
             .navigationTitle("Add Hotel")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Cancel button to dismiss the view
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
                 
+                // Save button to create the hotel booking
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         if let hotel = viewModel.createHotel() {
@@ -71,7 +87,7 @@ struct AddHotelView: View {
                             dismiss()
                         }
                     }
-                    .disabled(!viewModel.isValid)
+                    .disabled(!viewModel.isValid)  // Disabled when form is invalid
                 }
             }
         }

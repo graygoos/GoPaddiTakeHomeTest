@@ -7,43 +7,67 @@
 
 import SwiftUI
 
+// MARK: - TripPlanningViewModel
+/// ViewModel for managing trip planning and creation process
 class TripPlanningViewModel: ObservableObject {
+    // MARK: - Published Properties
+    /// Controls visibility of the trip planner overlay
     @Published var showingPlannerOverlay = true
+    /// Currently selected location for the trip
     @Published var selectedLocation: Location?
+    /// Selected start and end dates for the trip
     @Published var tripDates = TripDate()
+    /// Controls visibility of the location picker
     @Published var showLocationPicker = false
+    /// Controls visibility of the date picker
     @Published var showDatePicker = false
+    /// Flag indicating if selecting end date vs start date
     @Published var isSelectingEndDate = false
+    /// Controls visibility of trip creation form
     @Published var showCreateTrip = false
+    /// Controls visibility of trip details
     @Published var showTripDetail = false
+    /// List of all trips
     @Published var trips: [Trip] = []
+    /// Reference to newly created trip
     @Published var newlyCreatedTrip: Trip?
     
-    // API-related states
+    // MARK: - API Related States
+    /// Loading state indicator
     @Published var isLoading = false
+    /// Error message for displaying to user
     @Published var errorMessage: String?
+    /// Flag to control error alert visibility
     @Published var showError = false
     
+    // MARK: - Private Properties
+    /// Local storage manager for trips
     private let tripStore = TripStore.shared
+    /// Service for API interactions
     private let apiService: APIServiceProtocol
     
+    // MARK: - Computed Properties
+    /// Determines if sufficient information is available to create a trip
     var canCreateTrip: Bool {
         selectedLocation != nil && tripDates.startDate != nil && tripDates.endDate != nil
     }
     
+    // MARK: - Initialization
+    /// Initializes the view model with an optional API service
+    /// - Parameter apiService: Service for API interactions
     init(apiService: APIServiceProtocol = APIService.shared) {
         self.apiService = apiService
-        // Load stored trips immediately
         self.trips = tripStore.trips
     }
-
+    
+    // MARK: - Public Methods
+    /// Fetches trips from both API and local storage
     @MainActor
     func fetchTrips() async {
         do {
             isLoading = true
             let fetchedTrips = try await apiService.fetchTrips()
             
-            // Merge API trips with local trips, avoiding duplicates
             var allTrips = tripStore.trips
             for apiTrip in fetchedTrips {
                 if !allTrips.contains(where: { $0.id == apiTrip.id }) {
@@ -57,11 +81,15 @@ class TripPlanningViewModel: ObservableObject {
             errorMessage = "Failed to fetch remote trips. Showing local trips only."
             showError = true
             isLoading = false
-            // Use local trips if API fails
             trips = tripStore.trips
         }
     }
     
+    /// Creates a new detailed trip with provided information
+    /// - Parameters:
+    ///   - name: Name of the trip
+    ///   - travelStyle: Style of travel (e.g., solo, family)
+    ///   - description: Detailed description of the trip
     @MainActor
     func createDetailedTrip(name: String, travelStyle: TravelStyle, description: String) {
         guard let location = selectedLocation,
@@ -91,12 +119,10 @@ class TripPlanningViewModel: ObservableObject {
             
             do {
                 let createdTrip = try await apiService.createTrip(newTrip)
-                // Update both local arrays
                 trips.insert(createdTrip, at: 0)
                 tripStore.updateTrip(createdTrip)
                 newlyCreatedTrip = createdTrip
             } catch {
-                // If API fails, use the local trip
                 trips.insert(newTrip, at: 0)
                 tripStore.updateTrip(newTrip)
                 newlyCreatedTrip = newTrip
@@ -110,6 +136,8 @@ class TripPlanningViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Private Methods
+    /// Resets all form data after trip creation
     private func resetFormData() {
         selectedLocation = nil
         tripDates = TripDate()

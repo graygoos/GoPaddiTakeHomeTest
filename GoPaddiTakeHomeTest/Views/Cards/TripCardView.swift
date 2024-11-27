@@ -7,23 +7,30 @@
 
 import SwiftUI
 
+/// A view that displays a trip card with an image, details, and action button
+/// Used in trip listing screens to show trip previews
 struct TripCardView: View {
+    /// The trip data to display
     let trip: Trip
+    /// Callback executed when the view button is tapped
     let onViewTapped: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let location = trip.location {
+                // Location image header
                 Image(location.name)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(height: 200)
                     .clipped()
                 
+                // Trip details section
                 VStack(alignment: .leading, spacing: 8) {
                     Text(trip.name)
                         .font(.headline)
                     
+                    // Date and duration information
                     HStack {
                         Text(trip.date.formatted(date: .abbreviated, time: .omitted))
                         Spacer()
@@ -35,6 +42,7 @@ struct TripCardView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     
+                    // View details button
                     Button(action: onViewTapped) {
                         Text("View")
                             .fontWeight(.medium)

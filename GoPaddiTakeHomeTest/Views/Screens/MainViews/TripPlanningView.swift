@@ -7,16 +7,20 @@
 
 import SwiftUI
 
+/// Main view for trip planning functionality including trip creation and listing
 struct TripPlanningView: View {
+    /// View model containing trip planning logic and state
     @StateObject private var viewModel = TripPlanningViewModel()
+    /// Currently selected trip for navigation
     @State private var selectedTrip: Trip?
     
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
+                // Main content scroll view
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Header with hotel image
+                        // Hero header section with parallax effect
                         ZStack(alignment: .top) {
                             GeometryReader { proxy in
                                 let minY = proxy.frame(in: .named("scroll")).minY
@@ -31,6 +35,7 @@ struct TripPlanningView: View {
                             }
                             .frame(height: UIScreen.main.bounds.height * 0.75)
                             
+                            // Header text overlay
                             VStack(alignment: .leading, spacing: 16) {
                                 Text("Plan Your Dream Trip in Minutes")
                                     .font(.title2)
@@ -44,7 +49,7 @@ struct TripPlanningView: View {
                             .padding(.top, 20)
                         }
                         
-                        // Your Trips section
+                        // Trips list section
                         VStack(alignment: .leading, spacing: 24) {
                             Text("Your Trips")
                                 .font(.title2)
@@ -68,6 +73,7 @@ struct TripPlanningView: View {
                 }
                 .coordinateSpace(name: "scroll")
                 
+                // Trip planner overlay
                 if viewModel.showingPlannerOverlay {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
@@ -91,12 +97,11 @@ struct TripPlanningView: View {
                     .transition(.move(edge: .top))
                 }
                 
-                // Loading Overlay
+                // Loading and error states
                 if viewModel.isLoading {
                     LoadingOverlay()
                 }
                 
-                // Error Banner
                 if viewModel.showError {
                     ErrorBanner(message: viewModel.errorMessage ?? "An error occurred") {
                         viewModel.showError = false

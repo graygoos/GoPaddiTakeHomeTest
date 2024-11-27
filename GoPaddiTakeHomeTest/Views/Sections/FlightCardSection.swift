@@ -7,15 +7,24 @@
 
 import SwiftUI
 
+/// A view that wraps a flight card with standardized container styling for the flights section
 struct FlightCardSection: View {
-    let flight: Flight
-    var onRemove: () -> Void
-    
-    var body: some View {
-        CardContainer(type: .flights) {
-            FlightCard(flight: flight, onRemove: onRemove)
-        }
-    }
+   // MARK: - Properties
+   
+   /// The flight data to display in the card
+   let flight: Flight
+   
+   /// Closure called when the remove action is triggered
+   var onRemove: () -> Void
+   
+   // MARK: - Body
+   
+   var body: some View {
+       // Wrap flight card in container with flights styling
+       CardContainer(type: .flights) {
+           FlightCard(flight: flight, onRemove: onRemove)
+       }
+   }
 }
 
 #Preview("FlightCardSection") {

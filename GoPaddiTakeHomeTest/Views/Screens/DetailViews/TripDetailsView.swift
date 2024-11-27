@@ -7,16 +7,30 @@
 
 import SwiftUI
 
+// MARK: - TripDetailsView
+/// A comprehensive view that displays all details about a specific trip.
+/// Includes sections for flights, hotels, activities, and sharing options.
 struct TripDetailsView: View {
+    /// View model managing the trip's data and business logic
     @StateObject private var viewModel: TripDetailsViewModel
+    
+    /// Environment variable to dismiss the view
     @Environment(\.dismiss) private var dismiss
+    
+    /// Presentation mode for navigation control
     @Environment(\.presentationMode) var presentationMode
+    
+    // MARK: - State Variables
+    /// Controls the visibility of various alerts and sheets
     @State private var showDeleteAlert = false
     @State private var showCollaborationAlert = false
     @State private var showAddFlight = false
     @State private var showAddHotel = false
     @State private var showAddActivity = false
     
+    // MARK: - Initialization
+    /// Initializes the view with a specific trip
+    /// - Parameter trip: The trip to display details for
     init(trip: Trip) {
         _viewModel = StateObject(wrappedValue: TripDetailsViewModel(trip: trip))
     }
@@ -24,7 +38,8 @@ struct TripDetailsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Header Image
+                // MARK: - Header Section
+                // Location image banner
                 if let location = viewModel.trip.location {
                     Image(location.name)
                         .resizable()
@@ -34,7 +49,7 @@ struct TripDetailsView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    // Trip Dates Row
+                    // MARK: - Trip Date Range
                     if let endDate = viewModel.trip.endDate {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar")
@@ -47,20 +62,20 @@ struct TripDetailsView: View {
                         .font(.system(size: 15))
                     }
                     
-                    // Trip Name
+                    // MARK: - Trip Information
+                    // Trip name and location details
                     Text(viewModel.trip.name)
                         .font(.system(size: 24, weight: .bold))
                     
-                    // Location and Travel Style
                     if let location = viewModel.trip.location {
                         Text("\(location.name), \(location.country) \(location.flag) | \(viewModel.trip.travelStyle.rawValue) Trip")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }
                     
-                    // Action Buttons Row
+                    // MARK: - Action Buttons
                     HStack(spacing: 12) {
-                        // Trip Collaboration Button
+                        // Collaboration button
                         Button {
                             showCollaborationAlert = true
                         } label: {
@@ -78,7 +93,7 @@ struct TripDetailsView: View {
                             .cornerRadius(8)
                         }
                         
-                        // Share Trip Button
+                        // Share trip details
                         ShareLink(
                             item: "Check out my trip to \(viewModel.trip.location?.name ?? "")",
                             subject: Text("Trip Details"),
@@ -95,7 +110,7 @@ struct TripDetailsView: View {
                             .cornerRadius(8)
                         }
                         
-                        // More Options Menu
+                        // More options menu (including delete)
                         Menu {
                             Button(role: .destructive) {
                                 showDeleteAlert = true
@@ -112,7 +127,8 @@ struct TripDetailsView: View {
                     }
                     .padding(.vertical, 8)
                     
-                    // Activities Section
+                    // MARK: - Planning Sections
+                    // Activities section with add button
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Activities")
                             .font(.system(size: 17, weight: .semibold))
@@ -136,7 +152,7 @@ struct TripDetailsView: View {
                     .background(Color(hex: "0D1139"))
                     .cornerRadius(12)
                     
-                    // Hotels Section
+                    // Hotels section with add button
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Hotels")
                             .font(.system(size: 17, weight: .semibold))
@@ -159,7 +175,7 @@ struct TripDetailsView: View {
                     .background(Color.blue.opacity(0.1))
                     .cornerRadius(12)
                     
-                    // Flights Section
+                    // Flights section with add button
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Flights")
                             .font(.system(size: 17, weight: .semibold))
@@ -183,14 +199,14 @@ struct TripDetailsView: View {
                     .background(Color.blue)
                     .cornerRadius(12)
                     
-                    // Trip Itineraries Section
+                    // MARK: - Itineraries Section
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Trip Itineraries")
                             .font(.headline)
                         Text("Your Trip itineraries are placed here")
                             .foregroundStyle(.secondary)
                         
-                        // Flights
+                        // Display flights or empty state
                         if viewModel.flights.isEmpty {
                             EmptyStateCard(type: .flights) {
                                 showAddFlight = true
@@ -205,7 +221,7 @@ struct TripDetailsView: View {
                             }
                         }
                         
-                        // Hotels
+                        // Display hotels or empty state
                         if viewModel.hotels.isEmpty {
                             EmptyStateCard(type: .hotels) {
                                 showAddHotel = true
@@ -220,7 +236,7 @@ struct TripDetailsView: View {
                             }
                         }
                         
-                        // Activities
+                        // Display activities or empty state
                         if viewModel.activities.isEmpty {
                             EmptyStateCard(type: .activities) {
                                 showAddActivity = true
@@ -240,6 +256,7 @@ struct TripDetailsView: View {
                 .padding()
             }
         }
+        // MARK: - View Modifiers
         .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -250,6 +267,8 @@ struct TripDetailsView: View {
                 }
             }
         }
+        
+        // MARK: - Sheet Presentations
         .fullScreenCover(isPresented: $showAddFlight) {
             NavigationStack {
                 AddFlightView { flight in
@@ -269,7 +288,6 @@ struct TripDetailsView: View {
                     viewModel.addHotel(hotel)
                 }
                 .toolbar {
-                    // Hotel icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "building.2")
                             .foregroundStyle(.blue)
@@ -283,7 +301,6 @@ struct TripDetailsView: View {
                     viewModel.addActivity(activity)
                 }
                 .toolbar {
-                    // Activity icon
                     ToolbarItem(placement: .principal) {
                         Image(systemName: "figure.hiking")
                             .foregroundStyle(.blue)
@@ -291,6 +308,8 @@ struct TripDetailsView: View {
                 }
             }
         }
+        
+        // MARK: - Alerts
         .alert("Delete Trip", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {

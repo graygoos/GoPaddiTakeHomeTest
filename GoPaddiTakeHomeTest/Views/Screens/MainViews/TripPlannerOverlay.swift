@@ -7,20 +7,31 @@
 
 import SwiftUI
 
+/// An overlay view that provides trip planning functionality including location selection and date picking
 struct TripPlannerOverlay: View {
+    // MARK: - Properties
+    
+    /// View model containing trip planning logic and state
     @ObservedObject var viewModel: TripPlanningViewModel
+    
+    /// Controls the presentation of the trip creation sheet
     @State private var showCreateTripSheet = false
+    
+    /// Controls the display of validation alert when required fields are missing
     @State private var showAlert = false
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 16) {
-            // Where to?
+            // MARK: - Location Selection
+            
+            /// Location picker button that displays either selected city or default prompt
             Button {
                 viewModel.showLocationPicker = true
             } label: {
                 HStack {
-                    // Use custom location icon from assets
-                    Image("location-icon") 
+                    Image("location-icon")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 24, height: 24)
@@ -43,9 +54,10 @@ struct TripPlannerOverlay: View {
                 LocationPickerView(selectedLocation: $viewModel.selectedLocation)
             }
             
-            // Date Selection
+            // MARK: - Date Selection
+            
             HStack(spacing: 16) {
-                // Start Date
+                /// Start date picker button
                 Button {
                     viewModel.isSelectingEndDate = false
                     viewModel.showDatePicker = true
@@ -69,7 +81,7 @@ struct TripPlannerOverlay: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 
-                // End Date
+                /// End date picker button
                 Button {
                     viewModel.isSelectingEndDate = true
                     viewModel.showDatePicker = true
@@ -100,7 +112,9 @@ struct TripPlannerOverlay: View {
                 )
             }
             
-            // Create Trip Button
+            // MARK: - Create Trip Button
+            
+            /// Button to initiate trip creation, shows alert if required fields are missing
             Button {
                 if viewModel.canCreateTrip {
                     showCreateTripSheet = true
@@ -117,6 +131,7 @@ struct TripPlannerOverlay: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
+        // MARK: - Container Styling
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
@@ -124,9 +139,15 @@ struct TripPlannerOverlay: View {
                 .shadow(radius: 2)
         )
         .padding(.horizontal)
+        
+        // MARK: - Sheets and Alerts
+        
+        /// Sheet for trip creation flow
         .sheet(isPresented: $showCreateTripSheet) {
             CreateTripView(viewModel: viewModel)
         }
+        
+        /// Alert for missing required information
         .alert("Missing Information", isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         } message: {

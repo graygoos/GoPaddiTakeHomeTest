@@ -7,20 +7,28 @@
 
 import SwiftUI
 
+/// A view that displays details for a specific activity in a trip itinerary
+/// Includes an image carousel, activity information, and action buttons
 struct ActivityCard: View {
+    /// The activity data to display
     let activity: Activity
+    /// Index tracking the currently displayed image in the carousel
     @State private var currentImageIndex = 0
+    /// Controls visibility of the remove confirmation alert
     @State private var showRemoveAlert = false
+    /// Controls visibility of the time change modal
     @State private var showChangeTime = false
+    /// Callback executed when the remove action is confirmed
     var onRemove: () -> Void
     
+    /// Collection of image assets to display in the carousel
     private var activityImages: [String] {
         ["activity-1", "activity-2", "activity-3", "activity-4"]
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Image carousel with overlay buttons
+            // Image carousel section with navigation controls
             ZStack {
                 if let imageName = activityImages[safe: currentImageIndex] {
                     Image(imageName)
@@ -30,7 +38,7 @@ struct ActivityCard: View {
                         .clipped()
                 }
                 
-                // Navigation buttons overlay
+                // Left/Right navigation buttons
                 HStack {
                     Button {
                         withAnimation {
@@ -61,7 +69,7 @@ struct ActivityCard: View {
                 .padding(.horizontal, 16)
             }
             
-            // Activity details on white background
+            // Activity details section
             VStack(alignment: .leading, spacing: 12) {
                 // Title and description
                 Text(activity.name)
@@ -72,7 +80,7 @@ struct ActivityCard: View {
                     .foregroundColor(.secondary)
                     .lineLimit(2)
                 
-                // Location, rating, and duration
+                // Location, rating, and duration info
                 HStack(spacing: 16) {
                     Label(activity.location, systemImage: "mappin.circle")
                     
@@ -88,9 +96,8 @@ struct ActivityCard: View {
                 }
                 .font(.system(size: 14))
                 
-                // Time slots
+                // Time slot section
                 HStack(alignment: .top) {
-                    // Left side - Change time and actual time.
                     VStack(alignment: .leading, spacing: 4) {
                         Button {
                             showChangeTime = true
@@ -108,7 +115,6 @@ struct ActivityCard: View {
                     
                     Spacer()
                     
-                    // Right side - Activity day
                     Text(activity.day)
                         .font(.system(size: 14))
                         .padding(.horizontal, 12)
@@ -117,9 +123,7 @@ struct ActivityCard: View {
                         .cornerRadius(8)
                 }
                 
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 1)
+                Divider()
                 
                 // Action buttons
                 HStack {
@@ -135,11 +139,9 @@ struct ActivityCard: View {
                     }
                 }
                 
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 1)
+                Divider()
                 
-                // Price
+                // Price display
                 Text("₦\(activity.price, specifier: "%.2f")")
                     .font(.system(size: 16, weight: .medium))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -178,7 +180,6 @@ struct ActivityCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
-
 #Preview("All Cards") {
     ScrollView {
         VStack(spacing: 20) {

@@ -7,10 +7,14 @@
 
 import SwiftUI
 
+/// A banner that displays error messages with a dismiss button
 struct ErrorBanner: View {
+    /// The error message to display
     let message: String
+    
+    /// Closure called when the dismiss button is tapped
     let onDismiss: () -> Void
-
+    
     var body: some View {
         VStack {
             HStack {

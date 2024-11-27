@@ -7,15 +7,24 @@
 
 import SwiftUI
 
+/// A view that wraps a hotel card with standardized container styling for the hotels section
 struct HotelCardSection: View {
-    let hotel: Hotel
-    var onRemove: () -> Void
-    
-    var body: some View {
-        CardContainer(type: .hotels) {
-            HotelCard(hotel: hotel, onRemove: onRemove)
-        }
-    }
+   // MARK: - Properties
+   
+   /// The hotel data to display in the card
+   let hotel: Hotel
+   
+   /// Closure called when the remove action is triggered
+   var onRemove: () -> Void
+   
+   // MARK: - Body
+   
+   var body: some View {
+       // Wrap hotel card in container with hotels styling
+       CardContainer(type: .hotels) {
+           HotelCard(hotel: hotel, onRemove: onRemove)
+       }
+   }
 }
 
 #Preview("HotelCardSection") {

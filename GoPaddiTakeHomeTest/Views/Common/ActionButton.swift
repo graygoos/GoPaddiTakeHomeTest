@@ -7,9 +7,16 @@
 
 import SwiftUI
 
+/// A reusable button component that displays a title and subtitle with consistent styling
+/// Used for primary actions throughout the app
 struct ActionButton: View {
+    /// The main text displayed in the button
     let title: String
+    
+    /// Supporting text displayed below the title
     let subtitle: String
+    
+    /// Closure that gets executed when button is tapped
     let action: () -> Void
     
     var body: some View {

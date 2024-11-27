@@ -7,13 +7,18 @@
 
 import SwiftUI
 
+/// Reusable carousel view for displaying images with navigation controls
 struct ImageCarouselView: View {
-    let images: [String] 
+    /// Array of image names to display
+    let images: [String]
+    /// Current index in the image array
     @Binding var currentIndex: Int
+    /// Height of the carousel
     let height: CGFloat
     
     var body: some View {
         ZStack(alignment: .center) {
+            // Display current image
             if let imageName = images[safe: currentIndex] {
                 Image(imageName)
                     .resizable()
@@ -22,8 +27,9 @@ struct ImageCarouselView: View {
                     .clipped()
             }
             
-            // Navigation arrows
+            // Navigation arrows overlay
             HStack {
+                // Previous image button
                 Button {
                     withAnimation {
                         currentIndex = (currentIndex - 1 + images.count) % images.count
@@ -38,6 +44,7 @@ struct ImageCarouselView: View {
                 
                 Spacer()
                 
+                // Next image button
                 Button {
                     withAnimation {
                         currentIndex = (currentIndex + 1) % images.count

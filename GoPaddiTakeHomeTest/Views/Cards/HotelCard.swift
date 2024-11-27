@@ -7,19 +7,26 @@
 
 import SwiftUI
 
+/// A view that displays hotel details in a trip itinerary
+/// Shows hotel information, dates, amenities, and related actions
 struct HotelCard: View {
+    /// The hotel data to display
     let hotel: Hotel
+    /// Index tracking the currently displayed image in the carousel
     @State private var currentImageIndex = 0
+    /// Callback executed when the remove action is confirmed
     var onRemove: () -> Void
+    /// Controls visibility of the remove confirmation alert
     @State private var showRemoveAlert = false
     
+    /// Collection of image assets to display in the carousel
     private var hotelImages: [String] {
         ["hotel-1", "hotel-2", "hotel-3", "hotel-4"]
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Image carousel with overlay buttons
+            // Image carousel section with navigation controls
             ZStack {
                 if let imageName = hotelImages[safe: currentImageIndex] {
                     Image(imageName)
@@ -29,7 +36,7 @@ struct HotelCard: View {
                         .clipped()
                 }
                 
-                // Navigation buttons overlay
+                // Left/Right navigation buttons
                 HStack {
                     Button {
                         withAnimation {
@@ -60,7 +67,7 @@ struct HotelCard: View {
                 .padding(.horizontal, 16)
             }
             
-            // Hotel details on white background
+            // Hotel details section
             VStack(alignment: .leading, spacing: 12) {
                 // Name and address
                 Text(hotel.name)
@@ -71,7 +78,7 @@ struct HotelCard: View {
                     .foregroundColor(.secondary)
                     .lineLimit(2)
                 
-                // Rating and amenities row
+                // Rating and amenities information
                 HStack(spacing: 16) {
                     Button(action: {}) {
                         Label("Show in map", systemImage: "map")
@@ -92,9 +99,8 @@ struct HotelCard: View {
                     }
                 }
                 .font(.system(size: 14))
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 1)
+                
+                Divider()
                 
                 // Check-in/out dates
                 HStack(spacing: 20) {
@@ -113,9 +119,7 @@ struct HotelCard: View {
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
                 
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 1)
+                Divider()
                 
                 // Action buttons
                 HStack {
@@ -131,11 +135,9 @@ struct HotelCard: View {
                     }
                 }
                 
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 1)
+                Divider()
                 
-                // Price
+                // Price display
                 Text("₦\(hotel.price, specifier: "%.2f")")
                     .font(.system(size: 16, weight: .medium))
                     .frame(maxWidth: .infinity, alignment: .leading)

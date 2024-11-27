@@ -7,14 +7,24 @@
 
 import SwiftUI
 
+/// View for creating a new trip with basic details like name, style, and description
 struct CreateTripView: View {
+    /// View model containing trip planning logic and state
     @ObservedObject var viewModel: TripPlanningViewModel
+    /// Environment variable to dismiss the view
     @Environment(\.dismiss) private var dismiss
+    
+    // MARK: - State Properties
+    /// Name of the trip being created
     @State private var tripName = ""
+    /// Selected travel style for the trip
     @State private var selectedTravelStyle: TravelStyle?
+    /// Description of the trip
     @State private var tripDescription = ""
+    /// Flag to control navigation to trip details
     @State private var navigateToDetails = false
     
+    /// Validates if all required fields are filled
     var isFormValid: Bool {
         !tripName.isEmpty && selectedTravelStyle != nil && !tripDescription.isEmpty
     }
@@ -22,7 +32,7 @@ struct CreateTripView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                // Custom Header
+                // Custom header with logo and close button
                 HStack {
                     Image("palm-tree")
                         .resizable()
@@ -41,9 +51,10 @@ struct CreateTripView: View {
                 }
                 .padding()
                 
+                // Main form content
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        // Header
+                        // Header section
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Create a Trip")
                                 .font(.title2)
@@ -52,7 +63,7 @@ struct CreateTripView: View {
                                 .foregroundColor(.secondary)
                         }
                         
-                        // Trip Name
+                        // Trip name input
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Trip Name")
                                 .fontWeight(.medium)
@@ -60,7 +71,7 @@ struct CreateTripView: View {
                                 .textFieldStyle(.roundedBorder)
                         }
                         
-                        // Travel Style
+                        // Travel style selector
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Travel Style")
                                 .fontWeight(.medium)
@@ -86,7 +97,7 @@ struct CreateTripView: View {
                             }
                         }
                         
-                        // Trip Description
+                        // Trip description input
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Trip Description")
                                 .fontWeight(.medium)
@@ -100,7 +111,7 @@ struct CreateTripView: View {
                     .padding()
                 }
                 
-                // Bottom Button
+                // Create trip button
                 Button {
                     if isFormValid {
                         Task {
@@ -125,12 +136,11 @@ struct CreateTripView: View {
                 .padding()
             }
             
-            // Loading Overlay
+            // Loading and error states
             if viewModel.isLoading {
                 LoadingOverlay()
             }
             
-            // Error Banner
             if viewModel.showError {
                 ErrorBanner(message: viewModel.errorMessage ?? "An error occurred") {
                     viewModel.showError = false
@@ -142,15 +152,23 @@ struct CreateTripView: View {
     }
 }
 
+/// Represents different styles of travel that can be selected for a trip
 enum TravelStyle: String, Codable, CaseIterable, Identifiable {
-    case solo = "solo"       // Make sure to use lowercase
+    /// Single traveler journey
+    case solo = "solo"
+    /// Trip planned for two people
     case couple = "couple"
+    /// Family vacation style
     case family = "family"
+    /// Group travel arrangement
     case group = "group"
     
+    /// Conform to Identifiable protocol using rawValue as id
     var id: String { rawValue }
     
-    // Add custom decoder to handle case-insensitive strings
+    /// Custom decoder implementation to handle case-insensitive string values
+    /// - Parameter decoder: The decoder to read data from
+    /// - Throws: DecodingError if unable to decode the travel style
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawString = try container.decode(String.self).lowercased()
@@ -158,7 +176,7 @@ enum TravelStyle: String, Codable, CaseIterable, Identifiable {
         if let style = TravelStyle(rawValue: rawString) {
             self = style
         } else {
-            // Default to solo if unknown value
+            // Fallback to solo travel style if unknown value received
             self = .solo
         }
     }
@@ -166,9 +184,4 @@ enum TravelStyle: String, Codable, CaseIterable, Identifiable {
 
 #Preview("CreateTripView - Light") {
     CreateTripView(viewModel: TripPlanningViewModel())
-}
-
-#Preview("CreateTripView - Dark") {
-    CreateTripView(viewModel: TripPlanningViewModel())
-        .preferredColorScheme(.dark)
 }

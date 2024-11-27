@@ -7,22 +7,30 @@
 
 import SwiftUI
 
+/// A view that displays flight details in a trip itinerary
+/// Shows airline information, departure/arrival times, and related actions
 struct FlightCard: View {
+    /// The flight data to display
     let flight: Flight
+    /// Callback executed when the remove action is confirmed
     var onRemove: () -> Void
+    /// Controls visibility of the remove confirmation alert
     @State private var showRemoveAlert = false
     
+    /// Formats a date into a readable string format (e.g., "Sun, 20 Aug")
+    /// - Parameter date: The date to format
+    /// - Returns: A formatted string representation of the date
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE, dd MMM" // Format: Sun, 20 Aug
+        formatter.dateFormat = "EEE, dd MMM"
         return formatter.string(from: date)
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Main content
+            // Main content section
             VStack(spacing: 16) {
-                // Airline and flight number
+                // Airline and flight number header
                 HStack(spacing: 12) {
                     Circle()
                         .fill(Color.gray.opacity(0.2))
@@ -40,9 +48,9 @@ struct FlightCard: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
                 
-                // Flight time layout
+                // Flight schedule layout
                 HStack(alignment: .top) {
-                    // Left times (departure)
+                    // Departure information
                     VStack(alignment: .trailing) {
                         Text(flight.departureTime.formatted(date: .omitted, time: .shortened))
                             .font(.system(size: 24, weight: .medium))
@@ -51,9 +59,9 @@ struct FlightCard: View {
                             .foregroundColor(.secondary)
                     }
                     Spacer()
-                    // Center content
+                    
+                    // Flight duration and route
                     VStack(spacing: 8) {
-                        // Duration with icons
                         HStack(spacing: 4) {
                             Image(systemName: "airplane.departure")
                             Text(flight.duration)
@@ -62,7 +70,7 @@ struct FlightCard: View {
                         .font(.system(size: 14))
                         .foregroundColor(.primary)
                         
-                        // Progress bar
+                        // Progress indicator
                         Rectangle()
                             .fill(Color.appBlue.opacity(0.2))
                             .frame(height: 2)
@@ -73,7 +81,7 @@ struct FlightCard: View {
                                     .frame(maxWidth: .infinity, alignment: .center)
                             )
                         
-                        // Route
+                        // Route details
                         HStack(spacing: 8) {
                             Text(flight.origin)
                             Text("Direct")
@@ -84,7 +92,8 @@ struct FlightCard: View {
                     }
                     .frame(width: 120)
                     Spacer()
-                    // Right times (arrival)
+                    
+                    // Arrival information
                     VStack(alignment: .leading) {
                         Text(flight.arrivalTime.formatted(date: .omitted, time: .shortened))
                             .font(.system(size: 24, weight: .medium))
@@ -115,7 +124,7 @@ struct FlightCard: View {
                 
                 Divider()
                 
-                // Price
+                // Price display
                 HStack {
                     Text("₦\(flight.price, specifier: "%.2f")")
                         .font(.system(size: 16, weight: .medium))

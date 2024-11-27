@@ -7,7 +7,9 @@
 
 import SwiftUI
 
+/// A circular button containing an SF Symbol icon
 struct CircleButton: View {
+    /// The SF Symbol name to display in the button
     let icon: String
     
     var body: some View {

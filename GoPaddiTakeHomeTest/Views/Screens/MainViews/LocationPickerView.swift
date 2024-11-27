@@ -7,15 +7,27 @@
 
 import SwiftUI
 
+/// A view that allows users to search and select a location from a list of available destinations
 struct LocationPickerView: View {
+    // MARK: - Properties
+    
+    /// Reference to the dismiss action from the environment
     @Environment(\.dismiss) private var dismiss
+    
+    /// Binding to the selected location that will be passed back to the parent view
     @Binding var selectedLocation: Location?
+    
+    /// Tracks the current search text input
     @State private var searchText = ""
+    
+    /// View model handling location search functionality and results
     @StateObject private var locationSearch = LocationSearchService()
+    
+    // MARK: - Body
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom Header
+            // Header section with dismiss button and title
             HStack {
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
@@ -31,13 +43,14 @@ struct LocationPickerView: View {
             .padding(.top, getSafeAreaTop())
             .background(Color(UIColor.systemBackground))
             
-            // Search bar
+            // Search input with live filtering
             SearchBar(text: $searchText)
                 .padding()
                 .onChange(of: searchText) { _, newValue in
                     locationSearch.searchLocation(newValue)
                 }
             
+            // Content area showing loading, error, or results
             if locationSearch.isLoading {
                 ProgressView()
                     .padding()
@@ -46,6 +59,7 @@ struct LocationPickerView: View {
                     .foregroundColor(.red)
                     .padding()
             } else {
+                // Results list with selectable locations
                 List(locationSearch.searchResults) { location in
                     Button(action: {
                         selectedLocation = location

@@ -7,15 +7,24 @@
 
 import SwiftUI
 
+/// A view that wraps an activity card with standardized container styling for the activities section
 struct ActivityCardSection: View {
-    let activity: Activity
-    var onRemove: () -> Void
-    
-    var body: some View {
-        CardContainer(type: .activities) {
-            ActivityCard(activity: activity, onRemove: onRemove)
-        }
-    }
+   // MARK: - Properties
+   
+   /// The activity data to display in the card
+   let activity: Activity
+   
+   /// Closure called when the remove action is triggered
+   var onRemove: () -> Void
+   
+   // MARK: - Body
+   
+   var body: some View {
+       // Wrap activity card in container with activities styling
+       CardContainer(type: .activities) {
+           ActivityCard(activity: activity, onRemove: onRemove)
+       }
+   }
 }
 
 #Preview("ActivityCardSection") {

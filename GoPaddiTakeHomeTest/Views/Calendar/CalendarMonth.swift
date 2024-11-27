@@ -7,13 +7,19 @@
 
 import SwiftUI
 
+// MARK: - Calendar Month View
+/// A view that displays a calendar month with selectable dates for trip planning
 struct CalendarMonth: View {
+    /// The month to display
     let month: Date
+    /// Binding to the selected trip dates
     @Binding var tripDates: TripDate
+    /// Flag indicating if selecting end date (true) or start date (false)
     let isSelectingEndDate: Bool
     
     var body: some View {
         VStack(alignment: .leading) {
+            // Month and year header
             Text(month, format: .dateTime.month(.wide).year())
                 .font(.headline)
             
@@ -23,6 +29,7 @@ struct CalendarMonth: View {
             VStack(spacing: 8) {
                 WeekdayHeader()
                 
+                // Calendar grid layout
                 ForEach(weeks, id: \.self) { week in
                     HStack {
                         ForEach(week, id: \.self) { date in
@@ -33,6 +40,7 @@ struct CalendarMonth: View {
                                     isSelectingEndDate: isSelectingEndDate
                                 )
                             } else {
+                                // Empty cell for days outside current month
                                 Text("")
                                     .frame(maxWidth: .infinity)
                             }
@@ -65,8 +73,11 @@ struct CalendarMonth: View {
 }
 
 
-// MARK: - Calendar Helpers
+// MARK: - Calendar Extension
 extension Calendar {
+    /// Generates a 2D array of dates representing weeks in a given month
+    /// - Parameter month: The month to generate weeks for
+    /// - Returns: Array of week arrays, where each week contains 7 dates
     func weeks(for month: Date) -> [[Date]] {
         guard let monthInterval = self.dateInterval(of: .month, for: month) else { return [] }
         let firstWeek = self.dateInterval(of: .weekOfMonth, for: monthInterval.start)!.start

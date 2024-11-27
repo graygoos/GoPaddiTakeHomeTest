@@ -7,10 +7,18 @@
 
 import SwiftUI
 
+/// A generic container view that provides consistent styling for different card section types (flights, hotels, activities)
+/// Used as a wrapper to maintain visual consistency across different card types in the app
 struct CardContainer<Content: View>: View {
+    /// The type of card section being displayed (determines styling)
     let type: CardSectionType
+    /// The content view to be wrapped inside the container
     let content: Content
     
+    /// Initializes a new card container with specified type and content
+    /// - Parameters:
+    ///   - type: The CardSectionType that determines the styling
+    ///   - content: A closure returning the content view to be displayed
     init(type: CardSectionType, @ViewBuilder content: () -> Content) {
         self.type = type
         self.content = content()
@@ -18,7 +26,7 @@ struct CardContainer<Content: View>: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header section with icon and title
             HStack(spacing: 8) {
                 Image(systemName: type.icon)
                 Text(type.title)
@@ -29,7 +37,7 @@ struct CardContainer<Content: View>: View {
             .padding()
             .background(type.headerColor)
             
-            // Content
+            // Main content area
             content
                 .padding(.horizontal)
                 .padding(.vertical, 8)
@@ -99,59 +107,69 @@ struct CardContainer<Content: View>: View {
     }
 }
 
+/// Defines the appearance and content for different card section types in the app
+/// Used to maintain consistent styling across different types of travel itinerary sections
 enum CardSectionType {
-    case flights
-    case hotels
-    case activities
-    
-    var backgroundColor: Color {
-        switch self {
-        case .flights:
-            return Color(hex: "F0F2F5") // Light gray background
-        case .hotels:
-            return Color(hex: "344054") // Dark navy background
-        case .activities:
-            return Color(hex: "0054E4") // Bright blue background
-        }
-    }
-    
-    var headerColor: Color {
-        switch self {
-        case .flights:
-            return Color(hex: "F0F2F5")
-        case .hotels, .activities:
-            return .clear // No distinct header background
-        }
-    }
-    
-    var textColor: Color {
-        switch self {
-        case .flights:
-            return .primary
-        case .hotels, .activities:
-            return .white
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .flights:
-            return "airplane"
-        case .hotels:
-            return "building.2"
-        case .activities:
-            return "figure.hiking"
-        }
-    }
-    
-    var title: String {
-        switch self {
-        case .flights:
-            return "Flights"
-        case .hotels:
-            return "Hotels"
-        case .activities:
-            return "Activities"
-        }
-    }
+   /// Flight-related card sections
+   case flights
+   /// Hotel-related card sections
+   case hotels
+   /// Activity-related card sections
+   case activities
+   
+   /// The background color for the entire card section
+   var backgroundColor: Color {
+       switch self {
+       case .flights:
+           return Color(hex: "F0F2F5") // Light gray background
+       case .hotels:
+           return Color(hex: "344054") // Dark navy background
+       case .activities:
+           return Color(hex: "0054E4") // Bright blue background
+       }
+   }
+   
+   /// The background color for the header area of the card
+   var headerColor: Color {
+       switch self {
+       case .flights:
+           return Color(hex: "F0F2F5")
+       case .hotels, .activities:
+           return .clear // No distinct header background
+       }
+   }
+   
+   /// The color for text elements in the card
+   var textColor: Color {
+       switch self {
+       case .flights:
+           return .primary
+       case .hotels, .activities:
+           return .white
+       }
+   }
+   
+   /// The SF Symbol icon name for the card type
+   var icon: String {
+       switch self {
+       case .flights:
+           return "airplane"
+       case .hotels:
+           return "building.2"
+       case .activities:
+           return "figure.hiking"
+       }
+   }
+   
+   /// The display title for the card section
+   var title: String {
+       switch self {
+       case .flights:
+           return "Flights"
+       case .hotels:
+           return "Hotels"
+       case .activities:
+           return "Activities"
+       }
+   }
 }

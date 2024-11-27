@@ -7,17 +7,19 @@
 
 import SwiftUI
 
+/// An overlay view showing a loading indicator with text
 struct LoadingOverlay: View {
     var body: some View {
         ZStack {
+            // Semi-transparent background
             Color.black.opacity(0.4)
                 .ignoresSafeArea()
-
+            
+            // Loading indicator and text
             VStack(spacing: 16) {
                 ProgressView()
                     .scaleEffect(1.5)
                     .tint(.white)
-
                 Text("Loading...")
                     .font(.headline)
                     .foregroundColor(.white)

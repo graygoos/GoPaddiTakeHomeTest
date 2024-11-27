@@ -7,14 +7,18 @@
 
 import SwiftUI
 
+/// View for selecting start and end dates for a trip
 struct DatePickerView: View {
+    /// Environment variable to dismiss the view
     @Environment(\.dismiss) private var dismiss
+    /// Binding to hold the selected trip dates
     @Binding var tripDates: TripDate
+    /// Flag to determine if selecting end date or start date
     let isSelectingEndDate: Bool
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom navigation header
+            // Navigation header with close button and title
             HStack {
                 Button {
                     dismiss()
@@ -32,8 +36,10 @@ struct DatePickerView: View {
             .padding(.top, getSafeAreaTop())
             .background(Color(UIColor.systemBackground))
             
+            // Scrollable calendar months
             ScrollView {
                 VStack(spacing: 32) {
+                    // Display 12 months starting from current date
                     ForEach(0..<12) { month in
                         CalendarMonth(
                             month: Calendar.current.date(
@@ -48,8 +54,9 @@ struct DatePickerView: View {
                 .padding()
             }
             
-            // Bottom date selection area
+            // Date selection summary and confirmation button
             VStack(spacing: 16) {
+                // Start and end date display
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Start Date")
@@ -68,6 +75,7 @@ struct DatePickerView: View {
                     }
                 }
                 
+                // Confirmation button
                 Button("Choose Date") {
                     dismiss()
                 }

@@ -7,8 +7,12 @@
 
 import SwiftUI
 
+/// A simple text-based link component with customizable color
 struct ActionLink: View {
+    /// The text to display in the link
     let title: String
+    
+    /// The color of the link text (defaults to blue)
     var color: Color = .blue
     
     var body: some View {

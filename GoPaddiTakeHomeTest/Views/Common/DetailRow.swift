@@ -7,10 +7,19 @@
 
 import SwiftUI
 
+/// A row component displaying an icon and two text lines
+/// Used for showing detailed information in a consistent format
 struct DetailRow: View {
+    /// The SF Symbol name for the icon
     let icon: String
+    
+    /// The color of the icon
     let iconColor: Color
+    
+    /// The label text shown above the detail
     let title: String
+    
+    /// The main text shown below the title
     let detail: String
     
     var body: some View {
