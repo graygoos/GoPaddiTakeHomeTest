@@ -10,24 +10,14 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            TripListView()
+            TripPlanningView()
                 .tabItem {
                     Label("Trips", systemImage: "airplane")
                 }
             
-            Text("Where")
+            Text("Settings")
                 .tabItem {
-                    Label("Where", systemImage: "location")
-                }
-            
-            Text("Dates")
-                .tabItem {
-                    Label("Dates", systemImage: "calendar")
-                }
-            
-            Text("Plan a Trip")
-                .tabItem {
-                    Label("Plan", systemImage: "plus.circle")
+                    Label("Settings", systemImage: "gear")
                 }
         }
         .tint(AppColors.appBlue)

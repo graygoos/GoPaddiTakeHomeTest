@@ -6,13 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		05156B332CF093E200AA9BD9 /* GoPaddiTakeHomeTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05156B322CF093E200AA9BD9 /* GoPaddiTakeHomeTestApp.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		05156B2F2CF093E200AA9BD9 /* GoPaddiTakeHomeTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GoPaddiTakeHomeTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		05156B322CF093E200AA9BD9 /* GoPaddiTakeHomeTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoPaddiTakeHomeTestApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -37,9 +32,8 @@
 		05156B262CF093E200AA9BD9 = {
 			isa = PBXGroup;
 			children = (
-				05156B322CF093E200AA9BD9 /* GoPaddiTakeHomeTestApp.swift */,
-				05156B312CF093E200AA9BD9 /* GoPaddiTakeHomeTest */,
 				05156B302CF093E200AA9BD9 /* Products */,
+				05156B312CF093E200AA9BD9 /* GoPaddiTakeHomeTest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -125,7 +119,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05156B332CF093E200AA9BD9 /* GoPaddiTakeHomeTestApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
