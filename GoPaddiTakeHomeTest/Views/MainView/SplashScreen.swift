@@ -2,7 +2,7 @@
 //  SplashScreen.swift
 //  GoPaddiTakeHomeTest
 //
-//  Created by Femi Aliu on 27/11/2024.
+//  Created by Femi Aliu
 //
 
 import SwiftUI
