@@ -38,5 +38,4 @@ struct ActionLink: View {
         }
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

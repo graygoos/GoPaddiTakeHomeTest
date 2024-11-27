@@ -50,5 +50,4 @@ struct ActionButton: View {
         )
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

@@ -71,7 +71,6 @@ struct DayCell: View {
                 tripDates: .constant(TripDate()),
                 isSelectingEndDate: false
             )
-            .previewDisplayName("Current Day")
             
             // Selected start date
             DayCell(
@@ -82,7 +81,6 @@ struct DayCell: View {
                 )),
                 isSelectingEndDate: false
             )
-            .previewDisplayName("Selected Start Date")
             
             // Selected end date
             DayCell(
@@ -93,7 +91,6 @@ struct DayCell: View {
                 )),
                 isSelectingEndDate: true
             )
-            .previewDisplayName("Selected End Date")
         }
         
         VStack(spacing: 20) {
@@ -106,7 +103,7 @@ struct DayCell: View {
                 )),
                 isSelectingEndDate: false
             )
-            .previewDisplayName("In Range")
+
             
             // Past day
             DayCell(
@@ -114,7 +111,6 @@ struct DayCell: View {
                 tripDates: .constant(TripDate()),
                 isSelectingEndDate: false
             )
-            .previewDisplayName("Past Day")
             
             // Future day
             DayCell(
@@ -122,83 +118,9 @@ struct DayCell: View {
                 tripDates: .constant(TripDate()),
                 isSelectingEndDate: false
             )
-            .previewDisplayName("Future Day")
         }
     }
     .padding()
-    .previewLayout(.sizeThatFits)
-}
-
-// Dark mode preview
-#Preview("DayCell - Dark Mode") {
-    HStack(spacing: 20) {
-        // Selected start date
-        DayCell(
-            date: Date(),
-            tripDates: .constant(TripDate(
-                startDate: Date(),
-                endDate: nil
-            )),
-            isSelectingEndDate: false
-        )
-        
-        // Day in range
-        DayCell(
-            date: Date(),
-            tripDates: .constant(TripDate(
-                startDate: Calendar.current.date(byAdding: .day, value: -1, to: Date()),
-                endDate: Calendar.current.date(byAdding: .day, value: 1, to: Date())
-            )),
-            isSelectingEndDate: false
-        )
-        
-        // Regular future day
-        DayCell(
-            date: Calendar.current.date(byAdding: .day, value: 5, to: Date()) ?? Date(),
-            tripDates: .constant(TripDate()),
-            isSelectingEndDate: false
-        )
-    }
-    .padding()
-    .previewLayout(.sizeThatFits)
-    .preferredColorScheme(.dark)
-}
-
-// Different sizes preview
-#Preview("DayCell - Sizes") {
-    HStack(spacing: 20) {
-        DayCell(
-            date: Date(),
-            tripDates: .constant(TripDate(
-                startDate: Date(),
-                endDate: nil
-            )),
-            isSelectingEndDate: false
-        )
-        .frame(width: 30)
-        
-        DayCell(
-            date: Date(),
-            tripDates: .constant(TripDate(
-                startDate: Date(),
-                endDate: nil
-            )),
-            isSelectingEndDate: false
-        )
-        .frame(width: 40)
-        
-        DayCell(
-            date: Date(),
-            tripDates: .constant(TripDate(
-                startDate: Date(),
-                endDate: nil
-            )),
-            isSelectingEndDate: false
-        )
-        .frame(width: 50)
-    }
-    .padding()
-    .previewLayout(.sizeThatFits)
 }
 
 extension Date {

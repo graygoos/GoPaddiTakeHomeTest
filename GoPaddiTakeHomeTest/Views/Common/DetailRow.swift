@@ -55,5 +55,4 @@ struct DetailRow: View {
         )
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

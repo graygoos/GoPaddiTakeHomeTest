@@ -74,5 +74,4 @@ struct ImageCarouselView: View {
         }
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }

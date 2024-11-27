@@ -52,5 +52,4 @@ struct TripDetailRow: View {
         )
     }
     .padding()
-    .previewLayout(.sizeThatFits)
 }
