@@ -106,7 +106,7 @@ class APIService: APIServiceProtocol {
     static let shared = APIService()
     
     /// Base URL for the API endpoints
-    private let baseURL = "https://gopaddi5.free.beeceptor.com/api"
+    private let baseURL = "https://gopaddi.free.beeceptor.com/api"
     
     /// JSON decoder with custom configuration for API responses
     private let jsonDecoder: JSONDecoder = {
