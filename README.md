@@ -51,7 +51,7 @@ A SwiftUI-based iOS application for trip planning and management. Users can crea
 
 ### Requirements
 
-- iOS 16.0+
+- iOS 17.0+
 - Xcode 15.0+
 - Swift 5.9+
 
@@ -127,6 +127,7 @@ The project follows the MVVM (Model-View-ViewModel) architecture:
 - Local storage is implemented using UserDefaults for demonstration purposes
 - The application handles offline scenarios by storing data locally
 - The mock API may have request limitations, affecting the demo experience
+- Image assets and icons used for this project were sourced from: https://unsplash.com and https://www.freepik.com
 
 ## Contact
 
