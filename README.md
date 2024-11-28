@@ -3,7 +3,7 @@
 A SwiftUI-based iOS application for trip planning and management. Users can create trips, manage activities, flights, and hotels while having a seamless travel planning experience.
 
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/adfa029c-f4e6-4af3-b6f2-19e8a5bf44bb.png" width="250" height="250">
+    <img src="https://github.com/user-attachments/assets/ac65c694-3a28-42d0-b965-3dc312cf811" width="250" height="250">
 </p>
 
 ## Technologies Used
