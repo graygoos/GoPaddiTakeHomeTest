@@ -51,7 +51,7 @@ A SwiftUI-based iOS application for trip planning and management. Users can crea
 
 ### Requirements
 
-- iOS 16.0+
+- iOS 17.0+
 - Xcode 15.0+
 - Swift 5.9+
 
