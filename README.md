@@ -1,7 +1,6 @@
 # GoPaddi iOS Take Home Project
 
 A SwiftUI-based iOS application for trip planning and management. Users can create trips, manage activities, flights, and hotels while having a seamless travel planning experience.
-![GoPaddi icon](https://github.com/user-attachments/assets/dc8d3906-9b31-4b14-9810-6ea557d2b212)
 
 <p align="center">
     <img src="https://github.com/user-attachments/assets/dc8d3906-9b31-4b14-9810-6ea557d2b212" width="250" height="250">
