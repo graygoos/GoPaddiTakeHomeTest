@@ -130,4 +130,4 @@ The project follows the MVVM (Model-View-ViewModel) architecture:
 
 ## Contact
 
-For any questions or clarifications about the project, please reach out at [femialiu713@gmail.com]
+For any questions or clarifications about the project, please reach out at femialiu713@gmail.com
