@@ -71,7 +71,7 @@ struct TripPlannerOverlay: View {
                             Text("Start Date")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
-                            Text(viewModel.tripDates.startDate?.formatted(date: .abbreviated, time: .omitted) ?? "Enter Date")
+                            Text(viewModel.tripDates.startDate?.formatted(.dateTime.day() .month(.abbreviated)) ?? "Enter Date")
                                 .foregroundColor(.primary)
                         }
                         Spacer()
@@ -95,7 +95,7 @@ struct TripPlannerOverlay: View {
                             Text("End Date")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
-                            Text(viewModel.tripDates.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "Enter Date")
+                            Text(viewModel.tripDates.startDate?.formatted(.dateTime.day() .month(.abbreviated)) ?? "Enter Date")
                                 .foregroundColor(.primary)
                         }
                         Spacer()
